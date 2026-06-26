@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0b0b14;--card:#161630;--border:#232345;--border2:#2a2a50;--text:#f0f0f5;--text2:#a0a0b8;--text3:#65657a;--lime:#cbff49;--green:#4ade80;--red:#f87171;--amber:#fbbf24;--purple:#a78bfa;--r:16px;--r2:12px;--shadow:0 4px 20px rgba(0,0,0,.3)}
+:root{--bg:#08080f;--card:#191928;--border:#2e2e4a;--border2:#3a3a58;--text:#f0f0f5;--text2:#a0a0b8;--text3:#6e6e88;--lime:#cbff49;--green:#4ade80;--red:#f87171;--amber:#fbbf24;--purple:#a78bfa;--r:16px;--r2:12px;--shadow:0 4px 20px rgba(0,0,0,.3)}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .header{background:var(--card);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
@@ -16,7 +16,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .logo-mark{background:var(--lime);color:#000;font-weight:900;font-size:13px;letter-spacing:1px;padding:8px 12px;border-radius:10px}
 .logo-text{font-size:12px;color:var(--text3)}
 .header-r{display:flex;align-items:center;gap:8px}
-.sel{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:500;outline:none;font-family:inherit;cursor:pointer}
+.sel{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:500;outline:none;font-family:inherit;cursor:pointer;min-width:70px}
 .tabs{display:flex;gap:4px;background:var(--bg);border-radius:12px;padding:4px}
 .tab{background:none;border:none;color:var(--text3);font-size:12px;font-weight:600;padding:8px 16px;border-radius:10px;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
 .tab.active{background:var(--card);color:var(--lime)}
@@ -28,7 +28,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
 .g2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.card{background:var(--card);border-radius:var(--r);padding:20px;border:1px solid var(--border)}
+.card{background:var(--card);border-radius:var(--r);padding:20px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.25)}
 .card-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
 .tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--bg);color:var(--lime)}
 .card-flush{padding:0;overflow:hidden}
@@ -204,7 +204,7 @@ function rD(){
   var srColor=sr>=0?"var(--green)":"var(--red)";
 
   var h='<div class="hero"><div class="hero-grid">';
-  h+='<div><div class="label">Balance real del mes</div>';
+  h+='<div><div class="label">Balance real de '+MO[S.mo]+' '+S.yr+'</div>';
   h+='<div class="amount" style="color:'+balColor+'">'+fmt(bal)+'</div>';
   if(hasE){
     var varColor=bal>=balE?"var(--green)":"var(--red)";
@@ -391,15 +391,16 @@ function rI(){
   var h='<div class="sec-header"><div><div class="sec-title">Inversiones</div><div style="font-size:13px;color:var(--amber);font-weight:600">'+fmt(tot)+' invertidos</div></div>';
   h+='<button class="btn btn-sm '+(S.sf?"btn-dark":"btn-lime")+'" onclick="tgI()">'+(S.sf?"✕ Cerrar":"＋ Agregar")+'</button></div>';
   if(S.sf){
+    var fi=S._fi||{};
     h+='<div class="card" style="margin-bottom:16px;border-color:var(--amber)"><div class="form-stack">';
     h+='<select id="fIn" class="input"><option value="">Instrumento...</option>';
-    INST.forEach(function(i){h+='<option value="'+i+'">'+i+'</option>'});
+    INST.forEach(function(i){h+='<option value="'+i+'" '+(fi.instrument===i?"selected":"")+'>'+i+'</option>'});
     h+='</select>';
-    h+='<input id="fBk" class="input" placeholder="Broker / Plataforma">';
-    h+='<input id="fIa" class="input" type="number" inputmode="numeric" placeholder="Monto">';
-    h+='<input id="fId" class="input" type="date">';
-    h+='<input id="fIno" class="input" placeholder="Notas (ticker, plazo...)">';
-    h+='<button class="btn btn-lime btn-w" onclick="subI()">Registrar inversión</button></div></div>';
+    h+='<input id="fBk" class="input" placeholder="Broker / Plataforma" value="'+(fi.broker||"")+'">';
+    h+='<input id="fIa" class="input" type="number" inputmode="numeric" placeholder="Monto" value="'+(fi.amount||"")+'">';
+    h+='<input id="fId" class="input" type="date" value="'+(fi.date||"")+'">';
+    h+='<input id="fIno" class="input" placeholder="Notas (ticker, plazo...)" value="'+(fi.notes||"")+'">';
+    h+='<button class="btn btn-lime btn-w" onclick="subI()">'+(S.eid?"Guardar cambios":"Registrar inversión")+'</button></div></div>';
   }
   var bi={};S.inv.forEach(function(i){bi[i.instrument]=(bi[i.instrument]||0)+i.amount});
   var cd=Object.entries(bi).map(function(e){return{name:e[0],value:e[1]}});
@@ -411,18 +412,20 @@ function rI(){
       h+='<div class="txn"><div class="txn-dot" style="background:rgba(251,191,36,.1)">📈</div>';
       h+='<div class="txn-body"><div class="txn-cat">'+inv.instrument+'</div><div class="txn-desc">'+(inv.broker||"")+(inv.date?" · "+inv.date:"")+(inv.notes?" · "+inv.notes:"")+'</div></div>';
       h+='<div class="txn-right"><div class="txn-amt" style="color:var(--amber)">'+fmt(inv.amount)+'</div></div>';
-      h+='<button class="btn-i" onclick="dlI(\''+inv.id+'\')">🗑️</button></div>';
+      h+='<button class="btn-i" onclick="edI(\''+inv.id+'\')">✏️</button><button class="btn-i" onclick="dlI(\''+inv.id+'\')">🗑️</button></div>';
     });
     h+='</div>';
   }
   return h;
 }
-function tgI(){S.sf=!S.sf;render()}
+function tgI(){S.sf=!S.sf;S.eid=null;S._fi={};render()}
+function edI(id){var inv=S.inv.find(function(x){return x.id===id});if(!inv)return;S._fi={instrument:inv.instrument,broker:inv.broker||"",amount:inv.amount,date:inv.date||"",notes:inv.notes||""};S.eid=id;S.sf=true;render()}
 function subI(){
   var inst=Q("fIn").value,brk=Q("fBk").value,amt=parseFloat(Q("fIa").value),date=Q("fId").value,notes=Q("fIno").value;
   if(!inst||!amt)return toast("Completá instrumento y monto");
-  S.inv.push({instrument:inst,broker:brk,amount:amt,date:date,notes:notes,id:Date.now().toString()});
-  sv();S.sf=false;toast("Inversión registrada ✓");render();
+  var e={instrument:inst,broker:brk,amount:amt,date:date,notes:notes,id:S.eid||Date.now().toString()};
+  if(S.eid){S.inv=S.inv.map(function(i){return i.id===S.eid?e:i})}else{S.inv.push(e)}
+  sv();S.sf=false;S.eid=null;S._fi={};toast("Inversión "+(S.eid?"actualizada":"registrada")+" ✓");render();
 }
 function dlI(id){if(!confirm("¿Eliminar?"))return;S.inv=S.inv.filter(function(i){return i.id!==id});sv();toast("Eliminada");render()}
 function iI(){
@@ -445,7 +448,7 @@ function rG(){
     h+='<input id="gS" class="input" type="number" inputmode="numeric" placeholder="Ya tengo ahorrado" value="'+(f.saved||"")+'">';
     h+='<input id="gDl" class="input" type="date" value="'+(f.deadline||"")+'">';
     h+='<input id="gNo" class="input" placeholder="Notas" value="'+(f.notes||"")+'">';
-    h+='<button class="btn btn-w" style="background:var(--purple);color:#fff" onclick="subG()">Crear meta</button></div></div>';
+    h+='<button class="btn btn-w" style="background:var(--purple);color:#fff" onclick="subG()">'+(S.eid?"Guardar cambios":"Crear meta")+'</button></div></div>';
   }
   if(S.goals.length===0){h+='<div class="card empty"><div class="empty-icon">🎯</div><div>Definí tu primera meta</div></div>'}
   else{
@@ -458,7 +461,7 @@ function rG(){
       h+='<div style="font-size:17px;font-weight:700">'+(GI[g.icon]||"🎯")+' '+g.name+'</div>';
       if(g.deadline) h+='<div style="font-size:11px;color:var(--text3);margin-top:3px">Fecha: '+g.deadline+'</div>';
       if(g.notes) h+='<div style="font-size:12px;color:var(--text2);margin-top:2px">'+g.notes+'</div>';
-      h+='</div><button class="btn-i" onclick="dlG(\''+g.id+'\')">🗑️</button></div>';
+      h+='</div><button class="btn-i" onclick="edG(\''+g.id+'\')">✏️</button><button class="btn-i" onclick="dlG(\''+g.id+'\')">🗑️</button></div>';
       h+='<div style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">';
       h+='<span style="color:var(--text2)">'+fmt(g.saved)+' / '+fmt(g.target)+'</span>';
       h+='<span style="font-weight:700;color:'+pCol+'">'+p+'%</span></div>';
@@ -471,7 +474,8 @@ function rG(){
   }
   return h;
 }
-function tgG(){S.sf=!S.sf;S._fg={icon:"otro"};render()}
+function tgG(){S.sf=!S.sf;S.eid=null;S._fg={icon:"otro"};render()}
+function edG(id){var g=S.goals.find(function(x){return x.id===id});if(!g)return;S._fg={name:g.name,target:g.target,saved:g.saved,icon:g.icon||"otro",deadline:g.deadline||"",notes:g.notes||""};S.eid=id;S.sf=true;render()}
 function sgi(icon){
   S._fg=S._fg||{};S._fg.icon=icon;
   var gn=Q("gN"),gt=Q("gT"),gs=Q("gS"),gd=Q("gDl"),gno=Q("gNo");
@@ -481,8 +485,9 @@ function sgi(icon){
 function subG(){
   var name=Q("gN").value,target=parseFloat(Q("gT").value),saved=parseFloat(Q("gS").value||0),deadline=Q("gDl").value,notes=Q("gNo").value;
   if(!name||!target)return toast("Completá nombre y monto");
-  S.goals.push({name:name,target:target,saved:saved,icon:(S._fg||{}).icon||"otro",deadline:deadline,notes:notes,id:Date.now().toString()});
-  sv();S.sf=false;toast("Meta creada ✓");render();
+  var e={name:name,target:target,saved:saved,icon:(S._fg||{}).icon||"otro",deadline:deadline,notes:notes,id:S.eid||Date.now().toString()};
+  if(S.eid){S.goals=S.goals.map(function(g){return g.id===S.eid?e:g})}else{S.goals.push(e)}
+  sv();S.sf=false;S.eid=null;toast("Meta "+(S.eid?"actualizada":"creada")+" ✓");render();
 }
 function dlG(id){if(!confirm("¿Eliminar?"))return;S.goals=S.goals.filter(function(g){return g.id!==id});sv();toast("Eliminada");render()}
 function addG(id){
