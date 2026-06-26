@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mi Plata — Finanzas Personales</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a1a;--bg2:#111132;--bg3:#1a1a4e;--surface:#1e293b;
+  --border:#2d3a52;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --accent:#6366f1;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.hidden{display:none!important}
+
+.header{background:linear-gradient(135deg,#1a1a3e,#0d0d2b);padding:20px 16px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
+.header-top{display:flex;justify-content:space-between;align-items:center}
+.header-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);font-weight:600}
+.header-title{font-size:22px;font-weight:800;margin-top:2px}
+.header-selects{display:flex;gap:6px}
+.sel{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;outline:none;font-family:inherit;-webkit-appearance:none}
+
+.content{padding:16px;max-width:800px;margin:0 auto;padding-bottom:90px}
+
+.nav{position:fixed;bottom:0;left:0;right:0;background:#0f0f2d;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:6px 0 max(14px, env(safe-area-inset-bottom));z-index:50}
+.nav-btn{background:none;border:none;color:var(--text3);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-size:10px;font-family:inherit;padding:4px 8px;font-weight:400;transition:color .2s}
+.nav-btn.active{color:var(--accent);font-weight:600}
+.nav-btn svg{width:20px;height:20px}
+
+.card{background:var(--bg2);border-radius:16px;padding:16px;border:1px solid var(--border);margin-bottom:14px}
+.card-accent{border-color:var(--accent)}
+.card-amber{border-color:var(--amber)}
+.card-purple{border-color:var(--purple)}
+
+.balance-card{background:linear-gradient(135deg,var(--bg3),var(--bg2));text-align:center;padding:24px 16px}
+.balance-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.balance-amount{font-size:32px;font-weight:800;margin-top:4px}
+.bal-pos{color:var(--green)}.bal-neg{color:var(--red)}
+.balance-row{display:flex;justify-content:center;gap:32px;margin-top:14px}
+.bi-label{font-size:12px;display:flex;align-items:center;gap:4px}
+.bi-val{font-size:16px;font-weight:700;margin-top:2px}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{cursor:pointer;transition:transform .15s}
+.stat-card:hover{transform:scale(1.02)}
+
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.section-title{font-size:18px;font-weight:700}
+
+.btn{border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s}
+.btn:hover{opacity:.9}
+.btn-primary{background:var(--accent);color:#fff;width:100%}
+.btn-amber{background:var(--amber);color:#000;width:100%}
+.btn-purple{background:var(--purple);color:#fff;width:100%}
+.btn-sm{padding:8px 16px;font-size:13px;width:auto}
+.btn-xs{padding:6px 12px;font-size:12px;border-radius:8px;width:auto}
+.btn-ghost{background:none;border:none;color:var(--text3);padding:4px;cursor:pointer;font-size:14px}
+
+.input{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;width:100%;outline:none;font-family:inherit}
+.input:focus{border-color:var(--accent)}
+.form-stack{display:flex;flex-direction:column;gap:10px}
+.type-toggle{display:flex;gap:8px;margin-bottom:12px}
+.type-btn{flex:1;padding:8px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.t-green{background:var(--green);color:#fff}
+.t-red{background:var(--red);color:#fff}
+.t-off{background:var(--surface);color:var(--text2)}
+
+.txn-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px}
+.txn-left{flex:1;min-width:0}
+.txn-cat{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.txn-desc{font-size:12px;color:var(--text3);margin-top:2px;margin-left:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-date-label{font-size:11px;color:var(--text3);margin-top:2px;margin-left:26px}
+.txn-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.txn-amount{font-weight:700;font-size:14px}
+
+.pie-row{display:flex;align-items:center;gap:16px}
+.legend{flex:1;font-size:12px}
+.legend-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.legend-dot{width:8px;height:8px;border-radius:4px;display:inline-block;margin-right:6px}
+
+.chart-wrap{position:relative;width:100%;max-height:220px;margin:8px auto}
+.chart-sm{max-width:140px;max-height:140px;margin:0}
+
+.progress-bg{height:10px;background:var(--surface);border-radius:5px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;border-radius:5px;transition:width .5s ease}
+.p-accent{background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+.p-green{background:linear-gradient(90deg,#10b981,#06d6a0)}
+
+.goal-add{display:flex;gap:8px;margin-top:10px}
+.goal-add .input{flex:1;padding:8px 10px;font-size:13px}
+
+.icon-picker{display:flex;gap:8px;flex-wrap:wrap}
+.icon-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:16px;cursor:pointer;transition:all .15s}
+.icon-btn.active{background:var(--purple);border-color:var(--purple)}
+
+.empty{text-align:center;padding:32px 16px;color:var(--text3)}
+.empty-icon{font-size:36px;margin-bottom:8px;opacity:.6}
+.kpi{text-align:center;padding:12px}
+.kpi-label{font-size:10px;color:var(--text2)}
+.kpi-value{font-size:20px;font-weight:800;margin-top:2px}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#10b981;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:100;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+@media(max-width:400px){
+  .balance-amount{font-size:26px}
+  .kpi-value{font-size:16px}
+  .balance-row{gap:20px}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-label">Finanzas Personales</div>
+      <div class="header-title">Mi Plata</div>
+    </div>
+    <div class="header-selects">
+      <select id="selMonth" class="sel" onchange="onMonthChange()"></select>
+      <select id="selYear" class="sel" onchange="onMonthChange()">
+        <option value="2025">2025</option>
+        <option value="2026" selected>2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="content" id="content"></div>
+
+<nav class="nav">
+  <button class="nav-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Inicio
+  </button>
+  <button class="nav-btn" data-tab="movimientos" onclick="switchTab('movimientos')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+    Movimientos
+  </button>
+  <button class="nav-btn" data-tab="analisis" onclick="switchTab('analisis')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+    Análisis
+  </button>
+  <button class="nav-btn" data-tab="inversiones" onclick="switchTab('inversiones')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+    Inversiones
+  </button>
+  <button class="nav-btn" data-tab="metas" onclick="switchTab('metas')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    Metas
+  </button>
+</nav>
+
+<script>
+const MONTHS=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const INC_SRC=["Mamá","Papá","Musa","Núcleo Sport","Nutrimed","C. Sandwich","Trading","Otros"];
+const EXP_CATS=[
+  {n:"Vivienda",s:"Alquiler, Luz, Agua, Gas, Internet"},
+  {n:"Créditos",s:"M. Crédito, Naranja, Cuotas"},
+  {n:"Mercadería",s:"Básicos, Pollería, Verdulería, Dietética"},
+  {n:"Transporte",s:"Remis, Cole, Combustible"},
+  {n:"Salud",s:"Médico, Gym, Medicación"},
+  {n:"Educación",s:"Cursos, Fotocopias, Materiales"},
+  {n:"Estética",s:"Uñas, Tattoo, Facial, Lifting"},
+  {n:"Servicios",s:"Spotify, Netflix, Apps"},
+  {n:"Tecnología",s:"Celular, Monitor, Cables"},
+  {n:"Vestuario",s:"Ropa, Accesorios, Calzados"},
+  {n:"Ocio",s:"Salidas, Regalos, Gastos hormiga"},
+  {n:"Inversión",s:"Aportes a inversiones"},
+  {n:"Impuestos",s:"Monotributo"},
+  {n:"Emprendimiento",s:"Musa, Nutrimed, Insumos"},
+  {n:"Ahorros",s:"Reservas, Colchón"}
+];
+const INST=["Cedears","Acciones","Bonos","Ob. Negociables","FCI","Letras","Caución","Monotrib","Naranja X","MM","Trading"];
+const CL=["#6366f1","#f59e0b","#10b981","#ef4444","#8b5cf6","#ec4899","#14b8a6","#f97316","#06b6d4","#84cc16","#e11d48","#a855f7","#0ea5e9","#eab308","#64748b"];
+const GI={emergencia:"🛡️",cirugia:"🏥",emprendimiento:"🚀",viaje:"✈️",tech:"💻",auto:"🚗",educacion:"📚",otro:"🎯"};
+
+let S={
+  tab:"dashboard",
+  txns:JSON.parse(localStorage.getItem("fp-txns")||"[]"),
+  inv:JSON.parse(localStorage.getItem("fp-inv")||"[]"),
+  goals:JSON.parse(localStorage.getItem("fp-goals")||"[]"),
+  mo:new Date().getMonth(),yr:new Date().getFullYear(),
+  sf:false,eid:null,_f:null,_fi:null,_fg:{icon:"otro"}
+};
+let CH={};
+
+const fmt=n=>new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(n);
+const $=id=>document.getElementById(id);
+function sv(){localStorage.setItem("fp-txns",JSON.stringify(S.txns));localStorage.setItem("fp-inv",JSON.stringify(S.inv));localStorage.setItem("fp-goals",JSON.stringify(S.goals))}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2000)}
+function killCharts(){Object.values(CH).forEach(c=>{try{c.destroy()}catch(e){}});CH={}}
+
+// Init month selector
+const sM=$("selMonth");
+MONTHS.forEach((m,i)=>{const o=document.createElement("option");o.value=i;o.textContent=m;if(i===S.mo)o.selected=true;sM.appendChild(o)});
+$("selYear").value=S.yr;
+
+function onMonthChange(){S.mo=+$("selMonth").value;S.yr=+$("selYear").value;render()}
+function switchTab(t){S.tab=t;S.sf=false;S.eid=null;document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));render()}
+
+// Data helpers
+function mTxns(m,y){return S.txns.filter(t=>t.month===(m??S.mo)&&t.year===(y??S.yr))}
+function sumType(txns,type){return txns.filter(t=>t.type===type).reduce((s,t)=>s+t.amount,0)}
+function grp(txns,type){
+  const m={};txns.filter(t=>t.type===type).forEach(t=>{m[t.category]=(m[t.category]||0)+t.amount});
+  return Object.entries(m).map(([n,v])=>({name:n,value:v})).sort((a,b)=>b.value-a.value);
+}
+function trend6(){
+  const d=[];for(let i=5;i>=0;i--){let m=S.mo-i,y=S.yr;if(m<0){m+=12;y--}const t=mTxns(m,y);d.push({l:MONTHS[m].slice(0,3),i:sumType(t,"ingreso"),e:sumType(t,"egreso")})}return d;
+}
+
+/* ========== RENDER ========== */
+function render(){
+  killCharts();const c=$("content");
+  if(S.tab==="dashboard"){c.innerHTML=rDash();iDash()}
+  else if(S.tab==="movimientos"){c.innerHTML=rMov()}
+  else if(S.tab==="analisis"){c.innerHTML=rAn();iAn()}
+  else if(S.tab==="inversiones"){c.innerHTML=rInv();iInv()}
+  else if(S.tab==="metas"){c.innerHTML=rMetas()}
+}
+
+/* DASHBOARD */
+function rDash(){
+  const t=mTxns(),inc=sumType(t,"ingreso"),exp=sumType(t,"egreso"),bal=inc-exp;
+  const ti=S.inv.reduce((s,i)=>s+i.amount,0);
+  const tgt=S.goals.reduce((s,g)=>s+g.target,0),tsv=S.goals.reduce((s,g)=>s+g.saved,0);
+  const pg=tgt>0?Math.round(tsv/tgt*100):0;
+  const pie=grp(t,"egreso"),top4=pie.slice(0,4);
+  const tr=trend6(),ht=tr.some(d=>d.i>0||d.e>0);
+
+  let h=`<div class="card balance-card">
+    <div class="balance-label">Balance del mes</div>
+    <div class="balance-amount ${bal>=0?"bal-pos":"bal-neg"}">${fmt(bal)}</div>
+    <div class="balance-row">
+      <div><div class="bi-label" style="color:var(--green)">▲ Ingresos</div><div class="bi-val">${fmt(inc)}</div></div>
+      <div><div class="bi-label" style="color:var(--red)">▼ Egresos</div><div class="bi-val">${fmt(exp)}</div></div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card stat-card" onclick="switchTab('inversiones')"><div style="font-size:18px">📈</div><div style="font-size:11px;color:var(--text2);margin-top:6px">Invertido</div><div style="font-size:18px;font-weight:700;color:var(--amber)">${fmt(ti)}</div></div>
+    <div class="card stat-card" onclick="switchTab('metas')"><div style="font-size:18px">🎯</div><div style="font-size:11px;color:var(--text2);margin-top:6px">Metas</div><div style="font-size:18px;font-weight:700;color:var(--purple)">${pg}%</div></div>
+  </div>`;
+
+  if(pie.length>0){
+    h+=`<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:12px">¿En qué se fue la plata?</div>
+    <div class="pie-row"><div class="chart-sm"><canvas id="dPie"></canvas></div>
+    <div class="legend">${top4.map((e,i)=>`<div class="legend-item"><span><span class="legend-dot" style="background:${CL[i]}"></span>${e.name}</span><span style="font-weight:600">${fmt(e.value)}</span></div>`).join("")}</div></div></div>`;
+  }
+  if(ht) h+=`<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:12px">Tendencia (6 meses)</div><div class="chart-wrap"><canvas id="dTrend"></canvas></div></div>`;
+
+  if(S.goals.length>0){
+    h+=`<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:12px">Progreso de metas</div>`;
+    S.goals.slice(0,3).forEach(g=>{const p=Math.min(100,Math.round(g.saved/g.target*100));
+      h+=`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${GI[g.icon]||"🎯"} ${g.name}</span><span style="color:var(--text2)">${p}%</span></div><div class="progress-bg"><div class="progress-fill ${p>=100?"p-green":"p-accent"}" style="width:${p}%"></div></div></div>`;
+    });h+=`</div>`;
+  }
+  if(t.length===0&&pie.length===0) h+=`<div class="card empty"><div class="empty-icon">📊</div><div>No hay movimientos este mes</div><button class="btn btn-primary" style="margin-top:16px;width:auto;padding:10px 24px" onclick="switchTab('movimientos')">Cargar mi primer movimiento</button></div>`;
+  return h;
+}
+function iDash(){
+  const t=mTxns(),pie=grp(t,"egreso"),tr=trend6();
+  if(pie.length>0&&$("dPie")){
+    CH.dp=new Chart($("dPie"),{type:"doughnut",data:{labels:pie.map(p=>p.name),datasets:[{data:pie.map(p=>p.value),backgroundColor:CL.slice(0,pie.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,cutout:"60%",plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.raw)}}}}});
+  }
+  if(tr.some(d=>d.i>0||d.e>0)&&$("dTrend")){
+    CH.dt=new Chart($("dTrend"),{type:"bar",data:{labels:tr.map(t=>t.l),datasets:[{label:"Ingresos",data:tr.map(t=>t.i),backgroundColor:"#10b981",borderRadius:4},{label:"Egresos",data:tr.map(t=>t.e),backgroundColor:"#ef4444",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:"#94a3b8",font:{size:11}},grid:{display:false}},y:{ticks:{color:"#94a3b8",font:{size:10},callback:v=>(v/1000).toFixed(0)+"k"},grid:{color:"#1e293b22"}}},plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+fmt(c.raw)}}}}});
+  }
+}
+
+/* MOVIMIENTOS */
+function rMov(){
+  const txns=[...mTxns()].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id-a.id);
+  const f=S._f||{type:"egreso",category:"",description:"",amount:"",date:""};
+  const cats=f.type==="ingreso"?INC_SRC:EXP_CATS;
+
+  let h=`<div class="section-header"><div class="section-title">Movimientos</div>
+    <button class="btn btn-sm ${S.sf?"":"btn-primary"}" style="${S.sf?"background:var(--red);color:#fff":""}" onclick="tgTxnForm()">${S.sf?"✕ Cerrar":"＋ Agregar"}</button></div>`;
+
+  if(S.sf){
+    h+=`<div class="card card-accent">
+      <div class="type-toggle">
+        <button class="type-btn ${f.type==="ingreso"?"t-green":"t-off"}" onclick="setTType('ingreso')">▲ Ingreso</button>
+        <button class="type-btn ${f.type==="egreso"?"t-red":"t-off"}" onclick="setTType('egreso')">▼ Egreso</button>
+      </div>
+      <div class="form-stack">
+        <select id="fCat" class="input">
+          <option value="">Categoría...</option>
+          ${f.type==="ingreso"
+            ?cats.map(c=>`<option value="${c}" ${f.category===c?"selected":""}>${c}</option>`).join("")
+            :cats.map(c=>`<option value="${c.n}" ${f.category===c.n?"selected":""}>${c.n} — ${c.s}</option>`).join("")}
+        </select>
+        <input id="fDesc" class="input" placeholder="Descripción (opcional)" value="${f.description||""}">
+        <input id="fAmt" class="input" type="number" inputmode="numeric" placeholder="Monto" value="${f.amount||""}">
+        <input id="fDate" class="input" type="date" value="${f.date||""}">
+        <button class="btn btn-primary" onclick="subTxn()">${S.eid?"Guardar cambios":"Registrar"}</button>
+      </div>
+    </div>`;
+  }
+
+  if(txns.length===0) h+=`<div class="card empty"><div class="empty-icon">💸</div><div>Sin movimientos este mes</div></div>`;
+  else txns.forEach(t=>{
+    const ic=t.type==="ingreso"?"<span style='color:var(--green)'>▲</span>":"<span style='color:var(--red)'>▼</span>";
+    h+=`<div class="card txn-item"><div class="txn-left"><div class="txn-cat">${ic} ${t.category}</div>${t.description?`<div class="txn-desc">${t.description}</div>`:""}${t.date?`<div class="txn-date-label">${t.date}</div>`:""}</div>
+    <div class="txn-right"><span class="txn-amount" style="color:${t.type==="ingreso"?"var(--green)":"var(--red)"}">${t.type==="ingreso"?"+":"−"}${fmt(t.amount)}</span>
+    <button class="btn-ghost" onclick="edTxn('${t.id}')">✏️</button><button class="btn-ghost" onclick="delTxn('${t.id}')">🗑️</button></div></div>`;
+  });
+  return h;
+}
+function tgTxnForm(){S.sf=!S.sf;S.eid=null;S._f={type:"egreso",category:"",description:"",amount:"",date:""};render()}
+function setTType(t){S._f=S._f||{};S._f.type=t;S._f.category="";render()}
+function subTxn(){
+  const cat=$("fCat").value,desc=$("fDesc").value,amt=parseFloat($("fAmt").value),date=$("fDate").value;
+  if(!cat||!amt)return toast("Completá categoría y monto");
+  const type=(S._f||{}).type||"egreso";
+  const e={type,category:cat,description:desc,amount:amt,date,month:S.mo,year:S.yr,id:S.eid||Date.now().toString()};
+  if(S.eid)S.txns=S.txns.map(t=>t.id===S.eid?e:t);else S.txns.push(e);
+  sv();S.sf=false;S.eid=null;S._f=null;toast(S.eid?"Actualizado":"Registrado");render();
+}
+function edTxn(id){const t=S.txns.find(x=>x.id===id);if(!t)return;S._f={type:t.type,category:t.category,description:t.description||"",amount:t.amount,date:t.date||""};S.eid=id;S.sf=true;render()}
+function delTxn(id){if(!confirm("¿Eliminar este movimiento?"))return;S.txns=S.txns.filter(t=>t.id!==id);sv();toast("Eliminado");render()}
+
+/* ANÁLISIS */
+function rAn(){
+  const t=mTxns(),inc=sumType(t,"ingreso"),exp=sumType(t,"egreso");
+  const sr=inc>0?Math.round((inc-exp)/inc*100):0;
+  const pie=grp(t,"egreso"),ipie=grp(t,"ingreso");
+  const top=pie.length>0?pie[0].name:"—";
+
+  let h=`<div class="section-title" style="margin-bottom:14px">Análisis</div>
+  <div class="grid-3">
+    <div class="card kpi"><div class="kpi-label">Ahorro</div><div class="kpi-value" style="color:${sr>=0?"var(--green)":"var(--red)"}">${sr}%</div></div>
+    <div class="card kpi"><div class="kpi-label">Movimientos</div><div class="kpi-value">${t.length}</div></div>
+    <div class="card kpi"><div class="kpi-label">Top gasto</div><div class="kpi-value" style="font-size:13px;color:var(--amber);margin-top:4px">${top}</div></div>
+  </div>`;
+  if(pie.length>0) h+=`<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:8px">Egresos por categoría</div><div class="chart-wrap"><canvas id="aPie"></canvas></div></div>`;
+  if(ipie.length>0) h+=`<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:8px">Ingresos por fuente</div><div class="chart-wrap"><canvas id="aInc"></canvas></div></div>`;
+  h+=`<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:8px">Evolución mensual</div><div class="chart-wrap"><canvas id="aTrend"></canvas></div></div>`;
+  if(pie.length===0&&ipie.length===0) h+=`<div class="card empty"><div class="empty-icon">📊</div><div>Cargá movimientos para ver el análisis</div></div>`;
+  return h;
+}
+function iAn(){
+  const t=mTxns(),pie=grp(t,"egreso"),ipie=grp(t,"ingreso"),tr=trend6();
+  const cOpts=(pos)=>({responsive:true,maintainAspectRatio:true,cutout:"55%",plugins:{legend:{position:pos||"bottom",labels:{color:"#94a3b8",font:{size:11},padding:12,usePointStyle:true,pointStyle:"circle"}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)}`}}}});
+  if(pie.length>0&&$("aPie"))CH.ap=new Chart($("aPie"),{type:"doughnut",data:{labels:pie.map(p=>p.name),datasets:[{data:pie.map(p=>p.value),backgroundColor:CL.slice(0,pie.length),borderWidth:0}]},options:cOpts()});
+  if(ipie.length>0&&$("aInc"))CH.ai=new Chart($("aInc"),{type:"doughnut",data:{labels:ipie.map(p=>p.name),datasets:[{data:ipie.map(p=>p.value),backgroundColor:["#10b981","#06b6d4","#f59e0b","#8b5cf6","#ec4899"],borderWidth:0}]},options:cOpts()});
+  if($("aTrend"))CH.at=new Chart($("aTrend"),{type:"bar",data:{labels:tr.map(t=>t.l),datasets:[{label:"Ingresos",data:tr.map(t=>t.i),backgroundColor:"#10b981",borderRadius:4},{label:"Egresos",data:tr.map(t=>t.e),backgroundColor:"#ef4444",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:"#94a3b8",font:{size:11}},grid:{display:false}},y:{ticks:{color:"#94a3b8",font:{size:10},callback:v=>(v/1000).toFixed(0)+"k"},grid:{color:"#1e293b33"}}},plugins:{legend:{labels:{color:"#94a3b8",font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+fmt(c.raw)}}}}});
+}
+
+/* INVERSIONES */
+function rInv(){
+  const tot=S.inv.reduce((s,i)=>s+i.amount,0);
+  const bi={};S.inv.forEach(i=>{bi[i.instrument]=(bi[i.instrument]||0)+i.amount});
+  const cd=Object.entries(bi).map(([n,v])=>({name:n,value:v}));
+  const f=S._fi||{};
+
+  let h=`<div class="section-header"><div><div class="section-title">Inversiones</div><div style="font-size:13px;font-weight:600;color:var(--amber)">${fmt(tot)} invertidos</div></div>
+    <button class="btn btn-sm btn-amber" onclick="tgInvForm()">${S.sf?"✕ Cerrar":"＋ Agregar"}</button></div>`;
+
+  if(S.sf){
+    h+=`<div class="card card-amber"><div class="form-stack">
+      <select id="fInst" class="input"><option value="">Instrumento...</option>${INST.map(i=>`<option value="${i}" ${f.instrument===i?"selected":""}>${i}</option>`).join("")}</select>
+      <input id="fBrk" class="input" placeholder="Broker / Plataforma" value="${f.broker||""}">
+      <input id="fIA" class="input" type="number" inputmode="numeric" placeholder="Monto invertido" value="${f.amount||""}">
+      <input id="fID" class="input" type="date" value="${f.date||""}">
+      <input id="fIN" class="input" placeholder="Notas (ticker, plazo, etc.)" value="${f.notes||""}">
+      <button class="btn btn-amber" onclick="subInv()">Registrar inversión</button>
+    </div></div>`;
+  }
+  if(cd.length>0) h+=`<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:8px">Distribución del portfolio</div><div class="chart-wrap"><canvas id="iPie"></canvas></div></div>`;
+  if(S.inv.length===0) h+=`<div class="card empty"><div class="empty-icon">📈</div><div>Agregá tu primera inversión</div></div>`;
+  else S.inv.forEach(inv=>{
+    h+=`<div class="card txn-item"><div class="txn-left"><div class="txn-cat">📈 ${inv.instrument}</div><div class="txn-desc">${inv.broker||""}${inv.date?" • "+inv.date:""}</div>${inv.notes?`<div class="txn-date-label">${inv.notes}</div>`:""}</div>
+    <div class="txn-right"><span class="txn-amount" style="color:var(--amber)">${fmt(inv.amount)}</span><button class="btn-ghost" onclick="delInv('${inv.id}')">🗑️</button></div></div>`;
+  });
+  return h;
+}
+function tgInvForm(){S.sf=!S.sf;S._fi={};render()}
+function subInv(){
+  const inst=$("fInst").value,brk=$("fBrk").value,amt=parseFloat($("fIA").value),date=$("fID").value,notes=$("fIN").value;
+  if(!inst||!amt)return toast("Completá instrumento y monto");
+  S.inv.push({instrument:inst,broker:brk,amount:amt,date,notes,id:Date.now().toString()});
+  sv();S.sf=false;toast("Inversión registrada");render();
+}
+function delInv(id){if(!confirm("¿Eliminar?"))return;S.inv=S.inv.filter(i=>i.id!==id);sv();toast("Eliminada");render()}
+function iInv(){
+  const bi={};S.inv.forEach(i=>{bi[i.instrument]=(bi[i.instrument]||0)+i.amount});
+  const d=Object.entries(bi).map(([n,v])=>({name:n,value:v}));
+  if(d.length>0&&$("iPie"))CH.ip=new Chart($("iPie"),{type:"doughnut",data:{labels:d.map(x=>x.name),datasets:[{data:d.map(x=>x.value),backgroundColor:CL.slice(0,d.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,cutout:"55%",plugins:{legend:{position:"bottom",labels:{color:"#94a3b8",font:{size:11},padding:12,usePointStyle:true,pointStyle:"circle"}},tooltip:{callbacks:{label:c=>`${c.label}: ${fmt(c.raw)}`}}}}});
+}
+
+/* METAS */
+function rMetas(){
+  const f=S._fg||{icon:"otro"};
+  let h=`<div class="section-header"><div class="section-title">Metas de ahorro</div>
+    <button class="btn btn-sm btn-purple" onclick="tgGoalForm()">${S.sf?"✕ Cerrar":"＋ Nueva meta"}</button></div>`;
+
+  if(S.sf){
+    h+=`<div class="card card-purple"><div class="form-stack">
+      <input id="gN" class="input" placeholder="Nombre de la meta" value="${f.name||""}">
+      <div class="icon-picker">${Object.entries(GI).map(([k,v])=>`<button class="icon-btn ${(f.icon||"otro")===k?"active":""}" onclick="setGIcon('${k}')">${v}</button>`).join("")}</div>
+      <input id="gT" class="input" type="number" inputmode="numeric" placeholder="Monto objetivo" value="${f.target||""}">
+      <input id="gS" class="input" type="number" inputmode="numeric" placeholder="Ya tengo ahorrado (opcional)" value="${f.saved||""}">
+      <input id="gDL" class="input" type="date" value="${f.deadline||""}">
+      <input id="gNo" class="input" placeholder="Notas" value="${f.notes||""}">
+      <button class="btn btn-purple" onclick="subGoal()">Crear meta</button>
+    </div></div>`;
+  }
+
+  if(S.goals.length===0) h+=`<div class="card empty"><div class="empty-icon">🎯</div><div>Definí tu primera meta de ahorro</div></div>`;
+  else S.goals.forEach(g=>{
+    const p=Math.min(100,Math.round(g.saved/g.target*100)),rem=Math.max(0,g.target-g.saved);
+    h+=`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:16px;font-weight:700">${GI[g.icon]||"🎯"} ${g.name}</div>${g.deadline?`<div style="font-size:11px;color:var(--text3);margin-top:2px">Fecha límite: ${g.deadline}</div>`:""}${g.notes?`<div style="font-size:12px;color:var(--text2);margin-top:2px">${g.notes}</div>`:""}</div>
+        <button class="btn-ghost" onclick="delGoal('${g.id}')">🗑️</button>
+      </div>
+      <div style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${fmt(g.saved)} de ${fmt(g.target)}</span><span style="font-weight:700;color:${p>=100?"var(--green)":"var(--purple)"}">${p}%</span></div>
+        <div class="progress-bg"><div class="progress-fill ${p>=100?"p-green":"p-accent"}" style="width:${p}%"></div></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Falta: ${fmt(rem)}</div>
+      </div>
+      <div class="goal-add"><input type="number" inputmode="numeric" class="input" placeholder="Sumar ahorro..." id="ga_${g.id}"><button class="btn btn-xs btn-purple" onclick="addGoal('${g.id}')">＋</button></div>
+    </div>`;
+  });
+  return h;
+}
+function tgGoalForm(){S.sf=!S.sf;S._fg={icon:"otro"};render()}
+function setGIcon(icon){
+  S._fg=S._fg||{};S._fg.icon=icon;
+  S._fg.name=$("gN")?.value||"";S._fg.target=$("gT")?.value||"";
+  S._fg.saved=$("gS")?.value||"";S._fg.deadline=$("gDL")?.value||"";
+  S._fg.notes=$("gNo")?.value||"";render();
+}
+function subGoal(){
+  const name=$("gN").value,target=parseFloat($("gT").value),saved=parseFloat($("gS").value||0),deadline=$("gDL").value,notes=$("gNo").value;
+  const icon=(S._fg||{}).icon||"otro";
+  if(!name||!target)return toast("Completá nombre y monto");
+  S.goals.push({name,target,saved,icon,deadline,notes,id:Date.now().toString()});
+  sv();S.sf=false;toast("Meta creada");render();
+}
+function delGoal(id){if(!confirm("¿Eliminar esta meta?"))return;S.goals=S.goals.filter(g=>g.id!==id);sv();toast("Eliminada");render()}
+function addGoal(id){
+  const el=$("ga_"+id);const amt=parseFloat(el?.value);if(!amt)return;
+  S.goals=S.goals.map(g=>g.id===id?{...g,saved:g.saved+amt}:g);sv();toast("Ahorro sumado");render();
+}
+
+render();
+</script>
+</body>
+</html>
