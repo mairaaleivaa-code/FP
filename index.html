@@ -96,11 +96,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 /* FAB */
 .fab-row{position:fixed;bottom:20px;right:32px;display:flex;gap:8px;z-index:50}
-.fab{border:none;border-radius:14px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:transform .15s}
+.fab{border:none;border-radius:14px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:transform .15s;background:var(--card2);color:var(--text);border:1px solid var(--border)}
 .fab:active{transform:scale(.95)}
-.fab-teal{background:var(--teal);color:#0d1b2a}
-.fab-blue{background:var(--blue);color:#fff}
-.fab-purple{background:var(--purple);color:#fff}
+.fab:hover{border-color:var(--teal)}
 
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
@@ -125,8 +123,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .mode-row{display:flex;background:var(--bg);border-radius:10px;padding:3px;margin-bottom:12px}
 .mode-btn{flex:1;padding:8px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--t3)}
 .mode-btn.active{background:var(--card2);color:var(--teal)}
-.btn-icon{background:none;border:none;color:var(--t3);padding:4px;cursor:pointer;font-size:13px;border-radius:6px}
-.btn-icon:hover{color:var(--text)}
+.btn-icon{background:none;border:none;color:var(--t3);padding:4px 6px;cursor:pointer;font-size:11px;border-radius:6px;font-family:inherit;font-weight:500;letter-spacing:.5px}
+.btn-icon:hover{color:var(--text);background:rgba(255,255,255,.05)}
 
 .empty-msg{text-align:center;padding:30px;color:var(--t3);font-size:13px}
 .sec-icon{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;margin-right:6px}
@@ -159,11 +157,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 <div class="hdr">
   <div class="hdr-left">
-    <h1><span style="color:var(--teal)">FP</span> Finanzas Personales</h1>
-    <p>Ingresos, egresos e inversiones en un solo lugar</p>
+    <h1 style="font-size:28px;font-weight:900;letter-spacing:1px">FP</h1>
   </div>
   <div class="hdr-right">
     <div class="month-badge" id="monthBadge"></div>
+    <div class="toggle-grp">
+      <button class="active" id="btnDash" onclick="setPage('dash')">Dashboard</button>
+      <button id="btnReg" onclick="setPage('reg')">Registro</button>
+    </div>
     <div class="toggle-grp">
       <button class="active" id="btnCur" onclick="setView(0)">Mes actual</button>
       <button id="btnPrev" onclick="setView(-1)">Mes anterior</button>
@@ -174,9 +175,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 <div class="page" id="page"></div>
 
 <div class="fab-row">
-  <button class="fab fab-teal" onclick="openModal('mov')">＋ Movimiento</button>
-  <button class="fab fab-blue" onclick="openModal('inv')">＋ Inversión</button>
-  <button class="fab fab-purple" onclick="openModal('meta')">＋ Meta</button>
+  <button class="fab" onclick="openModal('mov')">＋ Movimiento</button>
+  <button class="fab" onclick="openModal('inv')">＋ Inversión</button>
+  <button class="fab" onclick="openModal('meta')">＋ Meta</button>
 </div>
 
 <script>
@@ -207,8 +208,10 @@ var S={
   txns:JSON.parse(localStorage.getItem("fp-txns")||"[]"),
   inv:JSON.parse(localStorage.getItem("fp-inv")||"[]"),
   goals:JSON.parse(localStorage.getItem("fp-goals")||"[]"),
-  vOff:0
+  vOff:0,pg:"dash"
 };
+
+function setPage(p){S.pg=p;Q("btnDash").classList.toggle("active",p==="dash");Q("btnReg").classList.toggle("active",p==="reg");render()}
 var CH={};
 var now=new Date();
 
@@ -236,139 +239,59 @@ function render(){
 
   Q("monthBadge").textContent=MO[c.m]+" "+c.y;
 
-  // Previous month for comparison
+  if(S.pg==="reg") return renderReg(c,t);
+
   var pm=c.m-1,py=c.y;if(pm<0){pm=11;py--}
   var pt=gmt(pm,py),pInc=gsum(pt,"ingreso"),pExp=gsum(pt,"egreso");
   var incChg=pInc>0?Math.round((inc-pInc)/pInc*100):0;
   var expChg=pExp>0?Math.round((exp-pExp)/pExp*100):0;
   var balChg=(pInc-pExp)!==0?Math.round((bal-(pInc-pExp))/Math.abs(pInc-pExp)*100):0;
-
   var h="";
 
-  // KPI ROW
   h+='<div class="row r4">';
   h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>');
   h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true);
   h+=kpiCard("Balance neto",bal,balChg,"ic-bal",'<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>');
-  h+='<div class="card"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><div class="kpi-label">Tasa de ahorro</div><div class="kpi-val">'+sr+'%</div><div class="kpi-change '+(sr>=20?"kpi-up":"kpi-down")+'">'+(sr>=20?"Buen ritmo de ahorro":"Intentá ahorrar más")+'</div></div>';
+  h+='<div class="card"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><div class="kpi-label">Tasa de ahorro</div><div class="kpi-val">'+sr+'%</div><div class="kpi-change '+(sr>=20?"kpi-up":"kpi-down")+'">'+(sr>=20?"Buen ritmo":"Ajustar gastos")+'</div></div>';
   h+='</div>';
 
-  // MIDDLE ROW: Categories + Monthly chart
   var catData=ggrp(t,"egreso");
-  h+='<div class="row r2">';
-
-  // Category breakdown
-  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Adónde se va la plata</div><div class="card-sub">Distribución de gastos del mes por categoría</div>';
-  if(catData.length===0) h+='<div class="empty-msg">Sin egresos este mes</div>';
-  else{
-    var maxCat=catData[0].value;
-    catData.forEach(function(cd){
-      var pct=exp>0?Math.round(cd.value/exp*100):0;
-      var ec=EC.find(function(e){return e.n===cd.name});
-      var cl=ec?ec.cl:"#5dadec";
-      h+='<div class="cat-row"><div class="cat-dot" style="background:'+cl+'"></div>';
-      h+='<div class="cat-name">'+cd.name+'</div>';
-      h+='<div class="cat-bar-wrap"><div class="cat-bar" style="width:'+Math.round(cd.value/maxCat*100)+'%;background:'+cl+'"></div></div>';
-      h+='<div class="cat-vals"><span class="cat-amt">'+fmt(cd.value)+'</span><span class="cat-pct"> · '+pct+'%</span></div></div>';
-    });
-  }
-  h+='</div>';
-
-  // Monthly comparison chart
-  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación mensual</div><div class="card-sub">Ingresos vs egresos, últimos 5 meses</div>';
-  h+='<div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
-  h+='</div>';
-
-  // INCOME SOURCES
   var incData=ggrp(t,"ingreso");
-  if(incData.length>0){
-    h+='<div class="card" style="margin-bottom:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Fuentes de ingreso</div><div class="card-sub">De dónde viene tu plata este mes</div>';
-    var maxInc=incData[0].value;
-    incData.forEach(function(id){
-      h+='<div class="inc-row"><div class="inc-name">'+id.name+'</div>';
-      h+='<div class="inc-bar-wrap"><div class="inc-bar" style="width:'+Math.round(id.value/maxInc*100)+'%"></div></div>';
-      h+='<div class="inc-val">'+fmt(id.value)+'</div></div>';
-    });
-    h+='</div>';
-  }
+  h+='<div class="row r3">';
 
-  // RECENT MOVEMENTS with edit/delete
-  var recentTxns=t.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"")||(+b.id)-(+a.id)}).slice(0,12);
-  if(recentTxns.length>0){
-    h+='<div class="card" style="margin-bottom:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Movimientos del mes</div>';
-    h+='<div class="card-sub">Últimos registros · Tocá ✏️ para editar o ✕ para eliminar</div>';
-    recentTxns.forEach(function(tx){
-      var isIn=tx.type==="ingreso";
-      var isEst=tx.mode==="estimado";
-      var dotColor=isEst?"var(--gold)":isIn?"var(--teal)":"var(--coral)";
-      var sign=isIn?"+":"−";
-      var amtColor=isIn?"var(--teal)":"var(--coral)";
-      h+='<div class="mov-item"><div class="mov-dot" style="background:'+dotColor+'"></div>';
-      h+='<div class="mov-body"><div class="mov-cat">'+tx.category+(tx.subcategory?' <span style="color:var(--t3);font-weight:400">› '+tx.subcategory+'</span>':'')+'</div>';
-      h+='<div class="mov-sub">'+(tx.description||"")+(tx.date?" · "+tx.date:"")+(isEst?" · Estimado":"")+'</div></div>';
-      h+='<div class="mov-amt" style="color:'+amtColor+'">'+sign+fmt(tx.amount)+'</div>';
-      h+='<div class="mov-acts"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')" title="Editar">✏️</button>';
-      h+='<button class="btn-icon" onclick="delMov(\''+tx.id+'\')" title="Eliminar">✕</button></div></div>';
-    });
-    h+='</div>';
-  }
+  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Gastos por categoría</div>';
+  if(catData.length===0) h+='<div class="empty-msg">Sin egresos</div>';
+  else{var mx=catData[0].value;catData.slice(0,6).forEach(function(cd){var pct=exp>0?Math.round(cd.value/exp*100):0;var ec=EC.find(function(e){return e.n===cd.name});var cl=ec?ec.cl:"#5dadec";h+='<div class="cat-row"><div class="cat-dot" style="background:'+cl+'"></div><div class="cat-name">'+cd.name+'</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:'+Math.round(cd.value/mx*100)+'%;background:'+cl+'"></div></div><div class="cat-vals"><span class="cat-amt">'+fmt(cd.value)+'</span><span class="cat-pct">'+pct+'%</span></div></div>';})}
+  h+='</div>';
 
-  // INVESTMENTS
+  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div>';
+  if(incData.length===0) h+='<div class="empty-msg">Sin ingresos</div>';
+  else{var mi=incData[0].value;incData.forEach(function(d){h+='<div class="inc-row"><div class="inc-name">'+d.name+'</div><div class="inc-bar-wrap"><div class="inc-bar" style="width:'+Math.round(d.value/mi*100)+'%"></div></div><div class="inc-val">'+fmt(d.value)+'</div></div>';})}
+  h+='</div>';
+
+  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div><div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
+  h+='</div>';
+
   h+='<div class="sec"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>Inversiones</div>';
-  if(S.inv.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin inversiones registradas</div></div>';
-  else{
-    var totInv=S.inv.reduce(function(s,i){return s+i.amount},0);
-    h+='<div class="card-sub" style="margin-bottom:12px">Resumen de tu cartera · Total: <b style="color:var(--text)">'+fmt(totInv)+'</b></div>';
-    h+='<div class="row r3" style="margin-bottom:20px">';
-    S.inv.forEach(function(inv){
-      var riskIdx=inv.risk||0;
-      var risk=RISKS[riskIdx]||RISKS[0];
-      var ret=inv.returnPct||0;
-      h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center">';
-      h+='<div style="font-size:13px;font-weight:700">'+inv.instrument+'</div>';
-      h+='<span class="risk-badge '+risk.c+'">'+risk.n+'</span></div>';
-      h+='<div class="inv-amt">'+fmt(inv.amount)+'</div>';
-      h+='<div class="inv-ret" style="color:var(--teal)">+'+(ret||0)+'% anual est.</div>';
-      h+='<div style="display:flex;gap:4px;margin-top:8px;justify-content:flex-end">';
-      h+='<button class="btn-icon" onclick="editInv(\''+inv.id+'\')">✏️</button>';
-      h+='<button class="btn-icon" onclick="delInv(\''+inv.id+'\')">🗑️</button></div></div>';
-    });
-    h+='</div>';
-  }
+  if(S.inv.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin inversiones</div></div>';
+  else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r3" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div><div class="inv-ret" style="color:var(--teal)">+'+(inv.returnPct||0)+'% anual</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')">editar</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
 
-  // GOALS
-  h+='<div class="sec"><span class="sec-icon" style="background:rgba(182,142,255,.08);color:var(--purple)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas financieras</div>';
-  if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas definidas</div></div>';
-  else{
-    h+='<div class="row r2eq">';
-    S.goals.forEach(function(g){
-      var pct=Math.min(100,Math.round(g.saved/g.target*100));
-      var rem=Math.max(0,g.target-g.saved);
-      var monthly=g.monthly||0;
-      var monthsLeft=monthly>0?Math.ceil(rem/monthly):0;
-      var pColor=pct>=100?"var(--teal)":pct>60?"var(--blue)":"var(--gold)";
-      h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:flex-start">';
-      h+='<div><div class="goal-name" style="margin-bottom:2px">'+(GI[g.icon]||"◎")+' '+g.name+'</div></div>';
-      h+='<div style="display:flex;gap:4px"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">✏️</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">🗑️</button></div></div>';
-      h+='<div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pColor+';font-weight:700">'+pct+'%</span></div>';
-      h+='<div class="prog-bg"><div class="prog-fill" style="width:'+pct+'%;background:'+pColor+'"></div></div>';
-      h+='<div class="goal-info">';
-      if(monthly>0){
-        h+='Aporte mensual: <b style="color:var(--text)">'+fmt(monthly)+'</b><br>';
-        if(rem>0) h+='Falta: <b style="color:var(--text)">'+fmt(rem)+'</b> · Llegarías en <b style="color:var(--teal)">'+monthsLeft+(monthsLeft===1?' mes':' meses')+'</b>';
-        else h+='<b style="color:var(--teal)">¡Meta alcanzada!</b>';
-      } else{h+='Falta: <b style="color:var(--text)">'+fmt(rem)+'</b>';}
-      h+='</div>';
-      h+='<div style="display:flex;gap:6px;margin-top:10px">';
-      h+='<input type="number" inputmode="numeric" class="input" style="flex:1;padding:8px 10px;font-size:12px" placeholder="Sumar..." id="ga_'+g.id+'">';
-      h+='<button style="background:var(--teal);color:#0d1b2a;border:none;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px" onclick="addToGoal(\''+g.id+'\')">＋</button></div></div>';
-    });
-    h+='</div>';
-  }
+  h+='<div class="sec"><span class="sec-icon" style="background:rgba(182,142,255,.08);color:var(--purple)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas</div>';
+  if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas</div></div>';
+  else{h+='<div class="row r2eq">';S.goals.forEach(function(g){var p=Math.min(100,Math.round(g.saved/g.target*100));var rm=Math.max(0,g.target-g.saved);var mo=g.monthly||0;var ml=mo>0?Math.ceil(rm/mo):0;var pc=p>=100?"var(--teal)":p>60?"var(--blue)":"var(--gold)";h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="goal-name">'+(GI[g.icon]||"\u25ce")+' '+g.name+'</div>'+(g.where?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Ubicada en: '+g.where+'</div>':'')+'</div><div style="display:flex;gap:2px"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">editar</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">\u00d7</button></div></div><div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pc+';font-weight:700">'+p+'%</span></div><div class="prog-bg"><div class="prog-fill" style="width:'+p+'%;background:'+pc+'"></div></div><div class="goal-info">';if(mo>0){h+='Aporte: <b style="color:var(--text)">'+fmt(mo)+'/mes</b> · ';if(rm>0)h+='Falta '+fmt(rm)+' · <b style="color:var(--teal)">'+ml+(ml===1?' mes':' meses')+'</b>';else h+='<b style="color:var(--teal)">Meta alcanzada</b>';}else{h+='Falta: '+fmt(rm);}h+='</div><div style="display:flex;gap:6px;margin-top:10px"><input type="number" inputmode="numeric" class="input" style="flex:1;padding:8px 10px;font-size:12px" placeholder="Sumar..." id="ga_'+g.id+'"><button style="background:var(--card);color:var(--teal);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit" onclick="addToGoal(\''+g.id+'\')">+</button></div></div>';});h+='</div>';}
 
   Q("page").innerHTML=h;
   initCharts(c);
 }
+
+function renderReg(c,t){
+  var txns=t.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"")||(+b.id)-(+a.id)});
+  var h='<div class="sec" style="margin-bottom:16px"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Registro '+MO[c.m]+' '+c.y+'</div>';
+  if(txns.length===0) h+='<div class="card"><div class="empty-msg">Sin movimientos</div></div>';
+  else{h+='<div class="card" style="padding:12px 18px">';txns.forEach(function(tx){var isIn=tx.type==="ingreso";var isE=tx.mode==="estimado";var dc=isE?"var(--gold)":isIn?"var(--teal)":"var(--coral)";var sg=isIn?"+":"\u2212";var ac=isIn?"var(--teal)":"var(--coral)";h+='<div class="mov-item"><div class="mov-dot" style="background:'+dc+'"></div><div class="mov-body"><div class="mov-cat">'+tx.category+(tx.subcategory?' <span style="color:var(--t3);font-weight:400">\u203a '+tx.subcategory+'</span>':'')+'</div><div class="mov-sub">'+(tx.description||"")+(tx.date?" \u00b7 "+tx.date:"")+(isE?" \u00b7 Est.":"")+'</div></div><div class="mov-amt" style="color:'+ac+'">'+sg+fmt(tx.amount)+'</div><div class="mov-acts"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button><button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
+  Q("page").innerHTML=h;
+}
+
 
 function kpiCard(label,val,chg,iconCls,iconSvg,invertColor){
   var isUp=invertColor?chg<0:chg>0;
@@ -485,6 +408,7 @@ function renderMetaModal(){
   h+='<div class="form-row"><input id="gT" class="input" type="number" inputmode="numeric" placeholder="Monto objetivo" value="'+(f.target||"")+'">';
   h+='<input id="gS" class="input" type="number" inputmode="numeric" placeholder="Ya ahorrado" value="'+(f.saved||"0")+'"></div>';
   h+='<input id="gM" class="input" type="number" inputmode="numeric" placeholder="Aporte mensual estimado" value="'+(f.monthly||"")+'">';
+  h+='<input id="gW" class="input" placeholder="Dónde está la plata (ej: Naranja X, Plazo fijo...)" value="'+(f.where||"")+'">';
   h+='<input id="gDl" class="input" type="date" value="'+(f.deadline||"")+'">';
   h+='<input id="gNo" class="input" placeholder="Notas" value="'+(f.notes||"")+'">';
   h+='<button class="btn btn-purple" onclick="saveGoal()">'+(editId?"Guardar":"Crear meta")+'</button></div>';
@@ -511,7 +435,7 @@ function saveInv(){
 function saveGoal(){
   var name=Q("gN").value,target=parseFloat(Q("gT").value);
   if(!name||!target)return toast("Completá nombre y monto");
-  var e={name:name,target:target,saved:parseFloat(Q("gS").value)||0,monthly:parseFloat(Q("gM").value)||0,icon:formData.icon||"otro",deadline:Q("gDl").value,notes:Q("gNo").value,id:editId||Date.now().toString()};
+  var e={name:name,target:target,saved:parseFloat(Q("gS").value)||0,monthly:parseFloat(Q("gM").value)||0,icon:formData.icon||"otro",where:Q("gW").value,deadline:Q("gDl").value,notes:Q("gNo").value,id:editId||Date.now().toString()};
   if(editId){S.goals=S.goals.map(function(g){return g.id===editId?e:g})}else{S.goals.push(e)}
   sv();closeModal();toast("Meta guardada ✓");render();
 }
