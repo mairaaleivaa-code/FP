@@ -41,7 +41,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .card-sub{font-size:12px;color:var(--t2);margin-bottom:16px}
 
 /* KPI */
-.kpi-icon{position:absolute;top:18px;right:18px;font-size:20px;opacity:.6}
+.kpi-icon{position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t3)}
+.kpi-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.ic-up{background:rgba(45,212,168,.08);color:var(--teal)}
+.ic-down{background:rgba(255,107,138,.08);color:var(--coral)}
+.ic-bal{background:rgba(93,173,236,.08);color:var(--blue)}
+.ic-save{background:rgba(182,142,255,.08);color:var(--purple)}
 .kpi-label{font-size:13px;color:var(--t2);font-weight:500}
 .kpi-val{font-size:28px;font-weight:900;margin-top:6px;letter-spacing:-1px}
 .kpi-change{font-size:12px;font-weight:600;margin-top:6px}
@@ -59,7 +64,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .cat-pct{font-size:11px;color:var(--t2);margin-left:8px}
 
 /* CHART */
-.chart-box{position:relative;height:250px}
+.chart-box{position:relative;height:180px}
 
 /* INVESTMENTS */
 .inv-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r2);padding:16px}
@@ -124,6 +129,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .btn-icon:hover{color:var(--text)}
 
 .empty-msg{text-align:center;padding:30px;color:var(--t3);font-size:13px}
+.sec-icon{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;margin-right:6px}
+.sec-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.mov-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(42,63,85,.3);font-size:13px}
+.mov-item:last-child{border-bottom:none}
+.mov-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mov-body{flex:1;min-width:0}
+.mov-cat{font-weight:600}
+.mov-sub{font-size:11px;color:var(--t3)}
+.mov-amt{font-weight:700;font-size:13px;flex-shrink:0}
+.mov-acts{display:flex;gap:2px;flex-shrink:0;margin-left:4px}
 
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--teal);color:#0d1b2a;padding:10px 24px;border-radius:12px;font-size:13px;font-weight:700;z-index:200;opacity:0;transition:all .3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -144,8 +159,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 <div class="hdr">
   <div class="hdr-left">
-    <h1>Panel de Finanzas Personales</h1>
-    <p>Tus ingresos, egresos e inversiones en un solo lugar</p>
+    <h1><span style="color:var(--teal)">FP</span> Finanzas Personales</h1>
+    <p>Ingresos, egresos e inversiones en un solo lugar</p>
   </div>
   <div class="hdr-right">
     <div class="month-badge" id="monthBadge"></div>
@@ -232,10 +247,10 @@ function render(){
 
   // KPI ROW
   h+='<div class="row r4">';
-  h+=kpiCard("Ingresos",inc,incChg,"📈");
-  h+=kpiCard("Egresos",exp,expChg*-1,"📉",true);
-  h+=kpiCard("Balance neto",bal,balChg,"💰");
-  h+='<div class="card"><span class="kpi-icon">✨</span><div class="kpi-label">Tasa de ahorro</div><div class="kpi-val">'+sr+'%</div><div class="kpi-change '+(sr>=20?"kpi-up":"kpi-down")+'">'+(sr>=20?"Buen ritmo de ahorro":"Intentá ahorrar más")+'</div></div>';
+  h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>');
+  h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true);
+  h+=kpiCard("Balance neto",bal,balChg,"ic-bal",'<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>');
+  h+='<div class="card"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><div class="kpi-label">Tasa de ahorro</div><div class="kpi-val">'+sr+'%</div><div class="kpi-change '+(sr>=20?"kpi-up":"kpi-down")+'">'+(sr>=20?"Buen ritmo de ahorro":"Intentá ahorrar más")+'</div></div>';
   h+='</div>';
 
   // MIDDLE ROW: Categories + Monthly chart
@@ -243,7 +258,7 @@ function render(){
   h+='<div class="row r2">';
 
   // Category breakdown
-  h+='<div class="card"><div class="card-title">🕐 Adónde se va la plata</div><div class="card-sub">Distribución de tus gastos del mes por categoría</div>';
+  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Adónde se va la plata</div><div class="card-sub">Distribución de gastos del mes por categoría</div>';
   if(catData.length===0) h+='<div class="empty-msg">Sin egresos este mes</div>';
   else{
     var maxCat=catData[0].value;
@@ -260,14 +275,14 @@ function render(){
   h+='</div>';
 
   // Monthly comparison chart
-  h+='<div class="card"><div class="card-title">📊 Comparación mensual</div><div class="card-sub">Ingresos vs egresos, últimos 5 meses</div>';
+  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación mensual</div><div class="card-sub">Ingresos vs egresos, últimos 5 meses</div>';
   h+='<div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
   h+='</div>';
 
   // INCOME SOURCES
   var incData=ggrp(t,"ingreso");
   if(incData.length>0){
-    h+='<div class="card" style="margin-bottom:20px"><div class="card-title">💵 Fuentes de ingreso</div><div class="card-sub">De dónde viene tu plata este mes</div>';
+    h+='<div class="card" style="margin-bottom:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Fuentes de ingreso</div><div class="card-sub">De dónde viene tu plata este mes</div>';
     var maxInc=incData[0].value;
     incData.forEach(function(id){
       h+='<div class="inc-row"><div class="inc-name">'+id.name+'</div>';
@@ -277,8 +292,29 @@ function render(){
     h+='</div>';
   }
 
+  // RECENT MOVEMENTS with edit/delete
+  var recentTxns=t.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"")||(+b.id)-(+a.id)}).slice(0,12);
+  if(recentTxns.length>0){
+    h+='<div class="card" style="margin-bottom:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Movimientos del mes</div>';
+    h+='<div class="card-sub">Últimos registros · Tocá ✏️ para editar o ✕ para eliminar</div>';
+    recentTxns.forEach(function(tx){
+      var isIn=tx.type==="ingreso";
+      var isEst=tx.mode==="estimado";
+      var dotColor=isEst?"var(--gold)":isIn?"var(--teal)":"var(--coral)";
+      var sign=isIn?"+":"−";
+      var amtColor=isIn?"var(--teal)":"var(--coral)";
+      h+='<div class="mov-item"><div class="mov-dot" style="background:'+dotColor+'"></div>';
+      h+='<div class="mov-body"><div class="mov-cat">'+tx.category+(tx.subcategory?' <span style="color:var(--t3);font-weight:400">› '+tx.subcategory+'</span>':'')+'</div>';
+      h+='<div class="mov-sub">'+(tx.description||"")+(tx.date?" · "+tx.date:"")+(isEst?" · Estimado":"")+'</div></div>';
+      h+='<div class="mov-amt" style="color:'+amtColor+'">'+sign+fmt(tx.amount)+'</div>';
+      h+='<div class="mov-acts"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')" title="Editar">✏️</button>';
+      h+='<button class="btn-icon" onclick="delMov(\''+tx.id+'\')" title="Eliminar">✕</button></div></div>';
+    });
+    h+='</div>';
+  }
+
   // INVESTMENTS
-  h+='<div class="sec">📈 Inversiones</div>';
+  h+='<div class="sec"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>Inversiones</div>';
   if(S.inv.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin inversiones registradas</div></div>';
   else{
     var totInv=S.inv.reduce(function(s,i){return s+i.amount},0);
@@ -301,7 +337,7 @@ function render(){
   }
 
   // GOALS
-  h+='<div class="sec">🎯 Metas financieras</div>';
+  h+='<div class="sec"><span class="sec-icon" style="background:rgba(182,142,255,.08);color:var(--purple)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas financieras</div>';
   if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas definidas</div></div>';
   else{
     h+='<div class="row r2eq">';
@@ -312,7 +348,7 @@ function render(){
       var monthsLeft=monthly>0?Math.ceil(rem/monthly):0;
       var pColor=pct>=100?"var(--teal)":pct>60?"var(--blue)":"var(--gold)";
       h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:flex-start">';
-      h+='<div><div class="goal-icon">'+(GI[g.icon]||"🎯")+'</div><div class="goal-name">'+g.name+'</div></div>';
+      h+='<div><div class="goal-name" style="margin-bottom:2px">'+(GI[g.icon]||"◎")+' '+g.name+'</div></div>';
       h+='<div style="display:flex;gap:4px"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">✏️</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">🗑️</button></div></div>';
       h+='<div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pColor+';font-weight:700">'+pct+'%</span></div>';
       h+='<div class="prog-bg"><div class="prog-fill" style="width:'+pct+'%;background:'+pColor+'"></div></div>';
@@ -334,12 +370,12 @@ function render(){
   initCharts(c);
 }
 
-function kpiCard(label,val,chg,icon,invertColor){
+function kpiCard(label,val,chg,iconCls,iconSvg,invertColor){
   var isUp=invertColor?chg<0:chg>0;
   var arrow=chg>0?"↑":chg<0?"↓":"→";
   var cls=isUp?"kpi-up":"kpi-down";
   if(chg===0) cls="";
-  return '<div class="card"><span class="kpi-icon">'+icon+'</span><div class="kpi-label">'+label+'</div><div class="kpi-val">'+fmt(val)+'</div><div class="kpi-change '+cls+'">'+arrow+Math.abs(chg)+'% vs mes ant.</div></div>';
+  return '<div class="card"><span class="kpi-icon '+iconCls+'">'+iconSvg+'</span><div class="kpi-label">'+label+'</div><div class="kpi-val">'+fmt(val)+'</div><div class="kpi-change '+cls+'">'+arrow+Math.abs(chg)+'% vs mes ant.</div></div>';
 }
 
 function initCharts(c){
@@ -481,6 +517,7 @@ function saveGoal(){
 }
 
 function editInv(id){openModal("inv",id)}
+function delMov(id){if(!confirm("¿Eliminar movimiento?"))return;S.txns=S.txns.filter(function(t){return t.id!==id});sv();toast("Eliminado");render()}
 function delInv(id){if(!confirm("¿Eliminar inversión?"))return;S.inv=S.inv.filter(function(i){return i.id!==id});sv();toast("Eliminada");render()}
 function editGoal(id){openModal("meta",id)}
 function delGoal(id){if(!confirm("¿Eliminar meta?"))return;S.goals=S.goals.filter(function(g){return g.id!==id});sv();toast("Eliminada");render()}
