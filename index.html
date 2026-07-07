@@ -131,13 +131,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .btn-icon:hover{color:var(--text);background:rgba(255,255,255,.05)}
 
 
-.reg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.reg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.reg-col{display:flex;flex-direction:column}
 .reg-col h3{font-size:14px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .reg-table{width:100%;font-size:12px;border-collapse:collapse}
-.reg-table th{text-align:left;font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;border-bottom:1px solid var(--border)}
-.reg-table td{padding:7px 8px;border-bottom:1px solid rgba(42,63,85,.2);font-weight:500}
+.reg-table th{text-align:left;font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:6px 6px;border-bottom:1px solid var(--border)}
+.reg-table td{padding:7px 6px;border-bottom:1px solid rgba(42,63,85,.2);font-weight:500}
 .reg-table tr:last-child td{border-bottom:none}
 .reg-total{font-weight:700;border-top:2px solid var(--border)!important}
+.reg-total td{border-bottom:none!important;padding-top:10px}
+.reg-body{min-height:320px}
+.reg-pag{display:flex;justify-content:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.reg-pag button{background:var(--bg);border:1px solid var(--border);color:var(--t2);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+.reg-pag button:hover{color:var(--text);border-color:var(--teal)}
+.reg-pag span{font-size:11px;color:var(--t3);padding:4px 8px}
+.act-cell{white-space:nowrap;text-align:right}
 .var-pos{color:var(--teal)}.var-neg{color:var(--coral)}
 .kpi-est{font-size:11px;color:var(--t3);margin-top:6px}
 .kpi-est b{font-weight:700}
@@ -175,7 +183,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 <div class="hdr">
   <div class="hdr-left">
-    <h1 style="font-size:28px;font-weight:900;letter-spacing:1px">FP</h1>
+    <h1 style="font-size:28px;font-weight:900;letter-spacing:1px;cursor:pointer" onclick="setPage('dash');setView(0)">FP</h1>
   </div>
   <div class="hdr-right">
     <div class="month-badge" id="monthBadge"></div>
@@ -278,15 +286,6 @@ function render(){
   // Estimated totals for dashboard
   var incEst=t.filter(function(x){return x.type==="ingreso"&&x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
   var expEst=t.filter(function(x){return x.type==="egreso"&&x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
-  if(incEst>0||expEst>0){
-    var viDash=inc-incEst;var veDash=exp-expEst;
-    h+='<div class="row" style="grid-template-columns:1fr 1fr;margin-bottom:16px">';
-    h+='<div class="card" style="padding:14px 18px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--t2)">Ingresos estimados</span><span style="font-size:14px;font-weight:700">'+fmt(incEst)+'</span></div>';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:12px;color:var(--t2)">Variación</span><span style="font-size:14px;font-weight:700" class="'+(viDash>=0?"var-pos":"var-neg")+'">'+(viDash>=0?"+":"")+fmt(viDash)+'</span></div></div>';
-    h+='<div class="card" style="padding:14px 18px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--t2)">Egresos estimados</span><span style="font-size:14px;font-weight:700">'+fmt(expEst)+'</span></div>';
-    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:12px;color:var(--t2)">Variación</span><span style="font-size:14px;font-weight:700" class="'+(veDash>0?"var-neg":"var-pos")+'">'+(veDash>0?"+":"")+fmt(veDash)+'</span></div></div>';
-    h+='</div>';
-  }
 
   var catData=ggrp(t,"egreso");
   var incData=ggrp(t,"ingreso");
@@ -318,61 +317,80 @@ function render(){
 }
 
 function renderReg(c,t){
-  // Group by category, compare est vs real
-  function grpEstReal(arr,tp){
-    var cats={};
-    arr.filter(function(x){return x.type===tp}).forEach(function(x){
-      var key=x.category+(x.subcategory?" - "+x.subcategory:"")+(x.description?" - "+x.description:"");
-      if(!cats[key])cats[key]={name:x.category,sub:x.subcategory||"",desc:x.description||"",est:0,real:0,ids:[]};
-      if(x.mode==="estimado")cats[key].est+=x.amount;else cats[key].real+=x.amount;
-      cats[key].ids.push(x.id);
-    });
-    return Object.values(cats).sort(function(a,b){return(b.est+b.real)-(a.est+a.real)});
-  }
-  var ingRows=grpEstReal(t,"ingreso");
-  var egRows=grpEstReal(t,"egreso");
-  var totIngEst=ingRows.reduce(function(s,r){return s+r.est},0);
-  var totIngReal=ingRows.reduce(function(s,r){return s+r.real},0);
-  var totEgEst=egRows.reduce(function(s,r){return s+r.est},0);
-  var totEgReal=egRows.reduce(function(s,r){return s+r.real},0);
+  if(!S.regPageI)S.regPageI=0;
+  if(!S.regPageE)S.regPageE=0;
+  var PER=10;
+
+  var ingTxns=t.filter(function(x){return x.type==="ingreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
+  var egTxns=t.filter(function(x){return x.type==="egreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
+
+  var totIngEst=ingTxns.filter(function(x){return x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
+  var totIngReal=ingTxns.filter(function(x){return x.mode!=="estimado"}).reduce(function(s,x){return s+x.amount},0);
+  var totEgEst=egTxns.filter(function(x){return x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
+  var totEgReal=egTxns.filter(function(x){return x.mode!=="estimado"}).reduce(function(s,x){return s+x.amount},0);
+
+  var ingPage=ingTxns.slice(S.regPageI*PER,(S.regPageI+1)*PER);
+  var egPage=egTxns.slice(S.regPageE*PER,(S.regPageE+1)*PER);
+  var ingPages=Math.ceil(ingTxns.length/PER)||1;
+  var egPages=Math.ceil(egTxns.length/PER)||1;
 
   var h='<div class="sec" style="margin-bottom:16px"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Registro '+MO[c.m]+' '+c.y+'</div>';
   h+='<div class="reg-grid">';
 
-  // INGRESOS column
+  // INGRESOS
   h+='<div class="card reg-col"><h3 style="color:var(--teal)">INGRESOS</h3>';
-  h+='<table class="reg-table"><thead><tr><th>Categoría</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th></tr></thead><tbody>';
-  if(ingRows.length===0) h+='<tr><td colspan="4" style="text-align:center;color:var(--t3);padding:20px">Sin ingresos</td></tr>';
-  else{ingRows.forEach(function(r){
-    var v=r.real-r.est;var vc=v>=0?"var-pos":"var-neg";var vs=v>=0?"+":"";
-    h+='<tr><td>'+r.name+(r.desc?' <span style="color:var(--t3)">'+r.desc+'</span>':'')+'</td>';
-    h+='<td style="text-align:right;color:var(--t3)">'+fmt(r.est)+'</td>';
-    h+='<td style="text-align:right;font-weight:700">'+fmt(r.real)+'</td>';
-    h+='<td style="text-align:right" class="'+(r.est>0?vc:"")+'">'+(r.est>0?vs+fmt(v):"—")+'</td></tr>';
+  h+='<table class="reg-table"><thead><tr><th>Categoría</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
+  h+='<tbody class="reg-body">';
+  if(ingTxns.length===0) h+='<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:20px">Sin ingresos</td></tr>';
+  else{ingPage.forEach(function(tx){
+    var isE=tx.mode==="estimado";
+    var label=tx.category+(tx.description?" - "+tx.description:"");
+    h+='<tr><td>'+(isE?'<span style="color:var(--gold);font-size:9px">EST</span> ':'')+label+'</td>';
+    h+='<td style="text-align:right;color:var(--t3)">'+(isE?fmt(tx.amount):"—")+'</td>';
+    h+='<td style="text-align:right;font-weight:700">'+(isE?"—":fmt(tx.amount))+'</td>';
+    h+='<td style="text-align:right">—</td>';
+    h+='<td class="act-cell"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button> <button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></td></tr>';
   });}
+  h+='</tbody>';
   var vi=totIngReal-totIngEst;var vic=vi>=0?"var-pos":"var-neg";
-  h+='<tr class="reg-total"><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
-  h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td></tr>';
-  h+='</tbody></table></div>';
-
-  // EGRESOS column
-  h+='<div class="card reg-col"><h3 style="color:var(--coral)">EGRESOS</h3>';
-  h+='<table class="reg-table"><thead><tr><th>Categoría</th><th>Descripción</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th></tr></thead><tbody>';
-  if(egRows.length===0) h+='<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:20px">Sin egresos</td></tr>';
-  else{egRows.forEach(function(r){
-    var v=r.real-r.est;var vc=v>0?"var-neg":"var-pos";var vs=v>0?"+":"";
-    h+='<tr><td>'+r.name+'</td><td style="color:var(--t3)">'+(r.sub||r.desc||"")+'</td>';
-    h+='<td style="text-align:right;color:var(--t3)">'+fmt(r.est)+'</td>';
-    h+='<td style="text-align:right;font-weight:700">'+fmt(r.real)+'</td>';
-    h+='<td style="text-align:right" class="'+(r.est>0?vc:"")+'">'+(r.est>0?vs+fmt(v):"—")+'</td></tr>';
-  });}
-  var ve=totEgReal-totEgEst;var vec=ve>0?"var-neg":"var-pos";
-  h+='<tr class="reg-total"><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
-  h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td></tr>';
-  h+='</tbody></table></div>';
-
+  h+='<tfoot><tr class="reg-total"><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
+  h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td><td></td></tr></tfoot>';
+  h+='</table>';
+  if(ingPages>1){h+='<div class="reg-pag">';
+    if(S.regPageI>0) h+='<button onclick="S.regPageI--;render();">\u2190 Ant</button>';
+    h+='<span>'+(S.regPageI+1)+'/'+ingPages+'</span>';
+    if(S.regPageI<ingPages-1) h+='<button onclick="S.regPageI++;render();">Sig \u2192</button>';
+    h+='</div>';}
   h+='</div>';
 
+  // EGRESOS
+  h+='<div class="card reg-col"><h3 style="color:var(--coral)">EGRESOS</h3>';
+  h+='<table class="reg-table"><thead><tr><th>Categoría</th><th>Detalle</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
+  h+='<tbody class="reg-body">';
+  if(egTxns.length===0) h+='<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px">Sin egresos</td></tr>';
+  else{egPage.forEach(function(tx){
+    var isE=tx.mode==="estimado";
+    var detail=tx.subcategory||tx.description||"";
+    h+='<tr><td>'+(isE?'<span style="color:var(--gold);font-size:9px">EST</span> ':'')+tx.category+'</td>';
+    h+='<td style="color:var(--t3)">'+detail+'</td>';
+    h+='<td style="text-align:right;color:var(--t3)">'+(isE?fmt(tx.amount):"—")+'</td>';
+    h+='<td style="text-align:right;font-weight:700">'+(isE?"—":fmt(tx.amount))+'</td>';
+    h+='<td style="text-align:right">—</td>';
+    h+='<td class="act-cell"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button> <button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></td></tr>';
+  });}
+  h+='</tbody>';
+  var ve=totEgReal-totEgEst;var vec=ve>0?"var-neg":"var-pos";
+  h+='<tfoot><tr class="reg-total"><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
+  h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td><td></td></tr></tfoot>';
+  h+='</table>';
+  if(egPages>1){h+='<div class="reg-pag">';
+    if(S.regPageE>0) h+='<button onclick="S.regPageE--;render();">\u2190 Ant</button>';
+    h+='<span>'+(S.regPageE+1)+'/'+egPages+'</span>';
+    if(S.regPageE<egPages-1) h+='<button onclick="S.regPageE++;render();">Sig \u2192</button>';
+    h+='</div>';}
+  h+='</div>';
+
+  h+='</div>';
   Q("page").innerHTML=h;
 }
 
