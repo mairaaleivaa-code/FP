@@ -101,13 +101,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .fab:hover{border-color:var(--teal)}
 
 /* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;backdrop-filter:blur(4px);overflow-y:auto}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;overflow-x:hidden}
 .modal h2{font-size:18px;font-weight:800;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
 .modal .close{background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer}
 .input{background:var(--bg);color:var(--text);border:1.5px solid var(--border);border-radius:var(--r2);padding:11px 14px;font-size:14px;width:100%;outline:none;font-family:inherit;font-weight:500}
 .input:focus{border-color:var(--teal)}
 .input::placeholder{color:var(--t3)}
+.input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(0.7);cursor:pointer}
+.input[type="date"]{color-scheme:dark}
 .form-stack{display:flex;flex-direction:column;gap:10px}
 .form-label{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:2px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -434,17 +436,19 @@ function renderMovModal(){
   var h='<h2>'+(editId?"Editar":"Nuevo")+' movimiento<button class="close" onclick="closeModal()">✕</button></h2>';
   h+='<div class="toggle-row"><button class="toggle-btn '+(f.type==="ingreso"?"tg-g":"")+'" onclick="formData.type=\'ingreso\';formData.category=\'\';renderModal()">▲ Ingreso</button>';
   h+='<button class="toggle-btn '+(f.type==="egreso"?"tg-r":"")+'" onclick="formData.type=\'egreso\';formData.category=\'\';renderModal()">▼ Egreso</button></div>';
-  h+='<div class="mode-row"><button class="mode-btn '+(f.mode==="real"?"active":"")+'" onclick="formData.mode=\'real\';renderModal()">💰 Real</button>';
-  h+='<button class="mode-btn '+(f.mode==="estimado"?"active":"")+'" onclick="formData.mode=\'estimado\';renderModal()">📋 Estimado</button></div>';
+  h+='<div class="mode-row"><button class="mode-btn '+(f.mode==="real"?"active":"")+'" onclick="formData.mode=\'real\';renderModal()">Real</button>';
+  h+='<button class="mode-btn '+(f.mode==="estimado"?"active":"")+'" onclick="formData.mode=\'estimado\';renderModal()">Estimado</button></div>';
   h+='<div class="form-stack">';
-  h+='<select id="mCat" class="input" onchange="formData.category=this.value;formData.subcategory=\'\';renderModal()"><option value="">Categoría...</option>';
-  if(f.type==="ingreso"){cats.forEach(function(c){h+='<option value="'+c+'" '+(f.category===c?"selected":"")+'>'+c+'</option>'})}
-  else{cats.forEach(function(c){h+='<option value="'+c.n+'" '+(f.category===c.n?"selected":"")+'>'+c.n+'</option>'})}
-  h+='</select>';
+  h+='<input id="mCat" class="input" list="catList" placeholder="Categoría... (escribí para filtrar)" value="'+(f.category||"")+'" onchange="formData.category=this.value;formData.subcategory=\'\';renderModal()" autocomplete="off">';
+  h+='<datalist id="catList">';
+  if(f.type==="ingreso"){cats.forEach(function(c){h+='<option value="'+c+'">'})}
+  else{cats.forEach(function(c){h+='<option value="'+c.n+'">'})}
+  h+='</datalist>';
   if(f.type==="egreso"&&selCat){
-    h+='<select id="mSub" class="input"><option value="">Subcategoría...</option>';
-    selCat.sc.forEach(function(s){h+='<option value="'+s+'" '+(f.subcategory===s?"selected":"")+'>'+s+'</option>'});
-    h+='</select>';
+    h+='<input id="mSub" class="input" list="subList" placeholder="Subcategoría..." value="'+(f.subcategory||"")+'" autocomplete="off">';
+    h+='<datalist id="subList">';
+    selCat.sc.forEach(function(s){h+='<option value="'+s+'">'});
+    h+='</datalist>';
   }
   h+='<input id="mDesc" class="input" placeholder="Descripción (opcional)" value="'+(f.description||"")+'">';
   h+='<input id="mAmt" class="input" type="number" inputmode="numeric" placeholder="Monto" value="'+(f.amount||"")+'">';
