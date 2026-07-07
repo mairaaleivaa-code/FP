@@ -200,7 +200,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button class="active" id="btnDash" onclick="setPage('dash')">Dashboard</button>
       <button id="btnReg" onclick="setPage('reg')">Registro</button>
     </div>
-    <select id="selMo" class="sel" style="min-width:100px;background:var(--teal);color:#0d1b2a;border:none;font-weight:700;border-radius:20px;padding:7px 16px;cursor:pointer;-webkit-appearance:none;appearance:none" onchange="setMo()"></select>
+    <select id="selMo" class="sel" style="min-width:110px;background:var(--card2);color:var(--text);border:1px solid var(--teal);font-weight:700;border-radius:20px;padding:7px 16px;cursor:pointer" onchange="setMo()"></select>
     <select id="selYr" class="sel" style="min-width:70px;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-weight:600;cursor:pointer" onchange="setMo()">
       <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
     </select>
@@ -262,7 +262,7 @@ function curM(){return{m:S.viewM,y:S.viewY}}
 function setMo(){S.viewM=+Q("selMo").value;S.viewY=+Q("selYr").value;render()}
 function initSelectors(){
   var sel=Q("selMo");sel.innerHTML="";
-  MO.forEach(function(m,i){var o=document.createElement("option");o.value=i;o.textContent=m;o.style.color="#0d1b2a";o.style.background="#fff";sel.appendChild(o)});
+  MO.forEach(function(m,i){var o=document.createElement("option");o.value=i;o.textContent=m;sel.appendChild(o)});
   sel.value=S.viewM;Q("selYr").value=S.viewY;
 }
 
