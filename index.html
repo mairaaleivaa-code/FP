@@ -193,20 +193,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 <div class="hdr">
   <div class="hdr-left">
-    <h1 style="font-size:28px;font-weight:900;letter-spacing:1px;cursor:pointer" onclick="setPage('dash');setView(0)">FP</h1>
+    <h1 style="font-size:28px;font-weight:900;letter-spacing:1px;cursor:pointer" onclick="setPage('dash')">FP</h1>
   </div>
   <div class="hdr-right">
-    <div class="month-badge" id="monthBadge"></div>
     <div class="toggle-grp">
       <button class="active" id="btnDash" onclick="setPage('dash')">Dashboard</button>
       <button id="btnReg" onclick="setPage('reg')">Registro</button>
     </div>
-    <div style="display:flex;gap:6px;align-items:center">
-      <select id="selMo" class="sel" style="min-width:90px" onchange="setMo()"></select>
-      <select id="selYr" class="sel" onchange="setMo()">
-        <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
-      </select>
-    </div>
+    <select id="selMo" class="sel" style="min-width:90px;background:var(--teal);color:#0d1b2a;border:none;font-weight:700;border-radius:20px;padding:7px 16px;cursor:pointer" onchange="setMo()"></select>
+    <select id="selYr" class="sel" style="min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-weight:600;cursor:pointer" onchange="setMo()">
+      <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
+    </select>
+    <div id="monthBadge" style="display:none"></div>
   </div>
 </div>
 
@@ -429,7 +427,7 @@ function renderReg(c,t){
   EC.forEach(function(cat,ci){
     h+='<div class="cat-item"><div class="cat-main" style="color:'+cat.cl+'">'+cat.n+'</div>';
     h+='<div class="cat-subs">'+cat.sc.join(", ")+'</div>';
-    h+='<div><button class="btn-icon" onclick="promptAddSub('+ci+')" title="Agregar sub">+ sub</button></div></div>';
+    h+='<div><button class="btn-icon" onclick="promptAddSub('+ci+')">+ sub</button> <button class="btn-icon" onclick="editCat('+ci+')">editar</button> <button class="btn-icon" onclick="delCat('+ci+')">\u00d7</button></div></div>';
   });
   h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button></div>';
   h+='</div>';
@@ -509,10 +507,8 @@ function renderMovModal(){
   var h='<h2>'+(editId?"Editar":"Nuevo")+' movimiento<button class="close" onclick="closeModal()">✕</button></h2>';
   h+='<div class="toggle-row"><button class="toggle-btn '+(f.type==="ingreso"?"tg-g":"")+'" onclick="formData.type=\'ingreso\';formData.category=\'\';renderModal()">▲ Ingreso</button>';
   h+='<button class="toggle-btn '+(f.type==="egreso"?"tg-r":"")+'" onclick="formData.type=\'egreso\';formData.category=\'\';renderModal()">▼ Egreso</button></div>';
-  h+='<div class="mode-row"><button class="mode-btn '+(f.mode==="real"?"active":"")+'" onclick="formData.mode=\'real\';renderModal()">Real</button>';
-  h+='<button class="mode-btn '+(f.mode==="estimado"?"active":"")+'" onclick="formData.mode=\'estimado\';renderModal()">Estimado</button></div>';
   h+='<div class="form-stack">';
-  h+='<input id="mCat" class="input" list="catList" placeholder="Categoría... (escribí para filtrar)" value="'+(f.category||"")+'" onchange="formData.category=this.value;formData.subcategory=\'\';renderModal()" autocomplete="off">';
+  h+='<input id="mCat" class="input" list="catList" placeholder="Categoría..." value="'+(f.category||"")+'" onchange="formData.category=this.value;formData.subcategory=\'\';renderModal()" autocomplete="off">';
   h+='<datalist id="catList">';
   if(f.type==="ingreso"){cats.forEach(function(c){h+='<option value="'+c+'">'})}
   else{cats.forEach(function(c){h+='<option value="'+c.n+'">'})}
@@ -524,9 +520,10 @@ function renderMovModal(){
     h+='</datalist>';
   }
   h+='<input id="mDesc" class="input" placeholder="Descripción (opcional)" value="'+(f.description||"")+'">';
-  h+='<input id="mAmt" class="input" type="number" inputmode="numeric" placeholder="Monto" value="'+(f.amount||"")+'">';
-  h+='<div class="date-wrap"><input id="mDate" class="input" type="date" value="'+(f.date||"")+'">';
-  h+='</div><button class="btn btn-teal" onclick="saveMov()">'+(editId?"Guardar":"Registrar")+'</button></div>';
+  h+='<div class="form-row"><div><div class="form-label">Estimado</div><input id="mEst" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.estimated||"")+'"></div>';
+  h+='<div><div class="form-label">Real</div><input id="mReal" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.realAmt||"")+'"></div></div>';
+  h+='<input id="mDate" class="input" type="date" value="'+(f.date||"")+'">';
+  h+='<button class="btn btn-teal" onclick="saveMov()">'+(editId?"Guardar":"Registrar")+'</button></div>';
   return h;
 }
 
@@ -571,13 +568,15 @@ function renderMetaModal(){
 
 // ===== SAVE FUNCTIONS =====
 function saveMov(){
-  var cat=Q("mCat").value,amt=parseFloat(Q("mAmt").value);
-  if(!cat||!amt)return toast("Completá categoría y monto");
+  var cat=Q("mCat").value;
+  var est=parseFloat(Q("mEst").value)||0;
+  var real=parseFloat(Q("mReal").value)||0;
+  if(!cat||(est===0&&real===0))return toast("Completá categoría y al menos un monto");
   var subEl=Q("mSub");
   var c=curM();
-  var e={type:formData.type,mode:formData.mode,category:cat,subcategory:subEl?subEl.value:"",description:Q("mDesc").value,amount:amt,date:Q("mDate").value,month:c.m,year:c.y,id:editId||Date.now().toString()};
+  var e={type:formData.type,category:cat,subcategory:subEl?subEl.value:"",description:Q("mDesc").value,estimated:est,realAmt:real,date:Q("mDate").value,month:c.m,year:c.y,id:editId||Date.now().toString()};
   if(editId){S.txns=S.txns.map(function(t){return t.id===editId?e:t})}else{S.txns.push(e)}
-  sv();closeModal();toast("Movimiento registrado ✓");render();
+  sv();closeModal();toast("Registrado \u2713");render();
 }
 function saveInv(){
   var inst=Q("iInst").value,amt=parseFloat(Q("iAmt").value);
@@ -599,8 +598,25 @@ function promptAddSub(catIdx){
   var name=prompt("Nueva subcategor\u00eda para "+EC[catIdx].n+":");
   if(!name)return;
   EC[catIdx].sc.push(name.trim());
-  S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice()}});
+  S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice(),cl:c.cl}});
   sv();toast("Subcategor\u00eda agregada");render();
+}
+function editCat(catIdx){
+  var cat=EC[catIdx];
+  var newName=prompt("Nombre de la categor\u00eda:",cat.n);
+  if(!newName)return;
+  var newSubs=prompt("Subcategor\u00edas (separar con coma):",cat.sc.join(", "));
+  if(newSubs===null)return;
+  EC[catIdx].n=newName.trim();
+  EC[catIdx].sc=newSubs.split(",").map(function(s){return s.trim()}).filter(function(s){return s});
+  S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice(),cl:c.cl}});
+  sv();toast("Categor\u00eda editada");render();
+}
+function delCat(catIdx){
+  if(!confirm("\u00bfEliminar "+EC[catIdx].n+"?"))return;
+  EC.splice(catIdx,1);
+  S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice(),cl:c.cl}});
+  sv();toast("Eliminada");render();
 }
 function addNewCat(){
   var name=Q("newCatName").value.trim();
