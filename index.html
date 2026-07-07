@@ -252,9 +252,10 @@ function curM(){var m=now.getMonth()+S.vOff,y=now.getFullYear();while(m<0){m+=12
 function setView(off){S.vOff=off;Q("btnCur").classList.toggle("active",off===0);Q("btnPrev").classList.toggle("active",off===-1);render()}
 
 function gmt(m,y){return S.txns.filter(function(t){return t.month===m&&t.year===y})}
-function gsum(arr,tp){return arr.filter(function(x){return x.type===tp&&x.mode!=="estimado"}).reduce(function(s,x){return s+x.amount},0)}
+function gsum(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){return s+(x.realAmt||x.amount||0)},0)}
+function gsumEst(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){return s+(x.estimated||0)},0)}
 function ggrp(arr,tp){
-  var m={};arr.filter(function(x){return x.type===tp&&x.mode!=="estimado"}).forEach(function(x){m[x.category]=(m[x.category]||0)+x.amount});
+  var m={};arr.filter(function(x){return x.type===tp}).forEach(function(x){m[x.category]=(m[x.category]||0)+(x.realAmt||x.amount||0)});
   return Object.entries(m).map(function(e){return{name:e[0],value:e[1]}}).sort(function(a,b){return b.value-a.value});
 }
 
@@ -273,8 +274,8 @@ function render(){
   var expChg=pExp>0?Math.round((exp-pExp)/pExp*100):0;
   var balChg=(pInc-pExp)!==0?Math.round((bal-(pInc-pExp))/Math.abs(pInc-pExp)*100):0;
   var h="";
-  var incEst=t.filter(function(x){return x.type==="ingreso"&&x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
-  var expEst=t.filter(function(x){return x.type==="egreso"&&x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
+  var incEst=gsumEst(t,"ingreso");
+  var expEst=gsumEst(t,"egreso");
 
   h+='<div class="row r4">';
   h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',false,incEst,"var(--teal)");
@@ -284,8 +285,8 @@ function render(){
   h+='</div>';
 
   // Estimated totals for dashboard
-  var incEst=t.filter(function(x){return x.type==="ingreso"&&x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
-  var expEst=t.filter(function(x){return x.type==="egreso"&&x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
+  var incEst=gsumEst(t,"ingreso");
+  var expEst=gsumEst(t,"egreso");
 
   var catData=ggrp(t,"egreso");
   var incData=ggrp(t,"ingreso");
@@ -324,10 +325,10 @@ function renderReg(c,t){
   var ingTxns=t.filter(function(x){return x.type==="ingreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
   var egTxns=t.filter(function(x){return x.type==="egreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
 
-  var totIngEst=ingTxns.filter(function(x){return x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
-  var totIngReal=ingTxns.filter(function(x){return x.mode!=="estimado"}).reduce(function(s,x){return s+x.amount},0);
-  var totEgEst=egTxns.filter(function(x){return x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
-  var totEgReal=egTxns.filter(function(x){return x.mode!=="estimado"}).reduce(function(s,x){return s+x.amount},0);
+  var totIngEst=ingTxns.reduce(function(s,x){return s+(x.estimated||0)},0);
+  var totIngReal=ingTxns.reduce(function(s,x){return s+(x.realAmt||x.amount||0)},0);
+  var totEgEst=egTxns.reduce(function(s,x){return s+(x.estimated||0)},0);
+  var totEgReal=egTxns.reduce(function(s,x){return s+(x.realAmt||x.amount||0)},0);
 
   var ingPage=ingTxns.slice(S.regPageI*PER,(S.regPageI+1)*PER);
   var egPage=egTxns.slice(S.regPageE*PER,(S.regPageE+1)*PER);
@@ -439,7 +440,7 @@ function openModal(type,id){
   modalType=type;editId=id||null;formData={};
   if(type==="mov"){
     if(id){var t=S.txns.find(function(x){return x.id===id});if(t)formData=Object.assign({},t)}
-    else formData={type:"egreso",mode:"real",category:"",subcategory:"",description:"",amount:"",date:""}
+    else formData={type:"egreso",category:"",subcategory:"",description:"",estimated:"",realAmt:"",date:""}
   }else if(type==="inv"){
     if(id){var inv=S.inv.find(function(x){return x.id===id});if(inv)formData=Object.assign({},inv)}
     else formData={instrument:"",broker:"",amount:"",date:"",notes:"",risk:0,returnPct:""}
@@ -563,7 +564,11 @@ function addToGoal(id){
 }
 
 // Migrate old data
-S.txns=S.txns.map(function(t){return t.mode?t:Object.assign({},t,{mode:"real"})});
+S.txns=S.txns.map(function(t){
+  if(t.estimated!==undefined) return t;
+  if(t.mode==="estimado") return Object.assign({},t,{estimated:t.amount,realAmt:0});
+  return Object.assign({},t,{estimated:0,realAmt:t.amount||0});
+});
 S.inv=S.inv.map(function(i){return i.risk!==undefined?i:Object.assign({},i,{risk:0,returnPct:0})});
 S.goals=S.goals.map(function(g){return g.monthly!==undefined?g:Object.assign({},g,{monthly:0})});
 sv();
