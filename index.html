@@ -126,6 +126,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .btn-icon{background:none;border:none;color:var(--t3);padding:4px 6px;cursor:pointer;font-size:11px;border-radius:6px;font-family:inherit;font-weight:500;letter-spacing:.5px}
 .btn-icon:hover{color:var(--text);background:rgba(255,255,255,.05)}
 
+
+.reg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.reg-col h3{font-size:14px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.reg-table{width:100%;font-size:12px;border-collapse:collapse}
+.reg-table th{text-align:left;font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;border-bottom:1px solid var(--border)}
+.reg-table td{padding:7px 8px;border-bottom:1px solid rgba(42,63,85,.2);font-weight:500}
+.reg-table tr:last-child td{border-bottom:none}
+.reg-total{font-weight:700;border-top:2px solid var(--border)!important}
+.var-pos{color:var(--teal)}.var-neg{color:var(--coral)}
+.kpi-est{font-size:11px;color:var(--t3);margin-top:6px}
+.kpi-est b{font-weight:700}
+.kpi-var{font-size:12px;font-weight:700;margin-top:3px}
+@media(max-width:700px){.reg-grid{grid-template-columns:1fr}}
+
 .empty-msg{text-align:center;padding:30px;color:var(--t3);font-size:13px}
 .sec-icon{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;margin-right:6px}
 .sec-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
@@ -255,6 +269,19 @@ function render(){
   h+='<div class="card"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><div class="kpi-label">Tasa de ahorro</div><div class="kpi-val">'+sr+'%</div><div class="kpi-change '+(sr>=20?"kpi-up":"kpi-down")+'">'+(sr>=20?"Buen ritmo":"Ajustar gastos")+'</div></div>';
   h+='</div>';
 
+  // Estimated totals for dashboard
+  var incEst=t.filter(function(x){return x.type==="ingreso"&&x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
+  var expEst=t.filter(function(x){return x.type==="egreso"&&x.mode==="estimado"}).reduce(function(s,x){return s+x.amount},0);
+  if(incEst>0||expEst>0){
+    var viDash=inc-incEst;var veDash=exp-expEst;
+    h+='<div class="row" style="grid-template-columns:1fr 1fr;margin-bottom:16px">';
+    h+='<div class="card" style="padding:14px 18px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--t2)">Ingresos estimados</span><span style="font-size:14px;font-weight:700">'+fmt(incEst)+'</span></div>';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:12px;color:var(--t2)">Variación</span><span style="font-size:14px;font-weight:700" class="'+(viDash>=0?"var-pos":"var-neg")+'">'+(viDash>=0?"+":"")+fmt(viDash)+'</span></div></div>';
+    h+='<div class="card" style="padding:14px 18px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--t2)">Egresos estimados</span><span style="font-size:14px;font-weight:700">'+fmt(expEst)+'</span></div>';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:12px;color:var(--t2)">Variación</span><span style="font-size:14px;font-weight:700" class="'+(veDash>0?"var-neg":"var-pos")+'">'+(veDash>0?"+":"")+fmt(veDash)+'</span></div></div>';
+    h+='</div>';
+  }
+
   var catData=ggrp(t,"egreso");
   var incData=ggrp(t,"ingreso");
   h+='<div class="row r3">';
@@ -285,10 +312,59 @@ function render(){
 }
 
 function renderReg(c,t){
-  var txns=t.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"")||(+b.id)-(+a.id)});
+  // Group by category, compare est vs real
+  function grpEstReal(arr,tp){
+    var cats={};
+    arr.filter(function(x){return x.type===tp}).forEach(function(x){
+      var key=x.category+(x.subcategory?" - "+x.subcategory:"")+(x.description?" - "+x.description:"");
+      if(!cats[key])cats[key]={name:x.category,sub:x.subcategory||"",desc:x.description||"",est:0,real:0};
+      if(x.mode==="estimado")cats[key].est+=x.amount;else cats[key].real+=x.amount;
+    });
+    return Object.values(cats).sort(function(a,b){return(b.est+b.real)-(a.est+a.real)});
+  }
+  var ingRows=grpEstReal(t,"ingreso");
+  var egRows=grpEstReal(t,"egreso");
+  var totIngEst=ingRows.reduce(function(s,r){return s+r.est},0);
+  var totIngReal=ingRows.reduce(function(s,r){return s+r.real},0);
+  var totEgEst=egRows.reduce(function(s,r){return s+r.est},0);
+  var totEgReal=egRows.reduce(function(s,r){return s+r.real},0);
+
   var h='<div class="sec" style="margin-bottom:16px"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Registro '+MO[c.m]+' '+c.y+'</div>';
-  if(txns.length===0) h+='<div class="card"><div class="empty-msg">Sin movimientos</div></div>';
-  else{h+='<div class="card" style="padding:12px 18px">';txns.forEach(function(tx){var isIn=tx.type==="ingreso";var isE=tx.mode==="estimado";var dc=isE?"var(--gold)":isIn?"var(--teal)":"var(--coral)";var sg=isIn?"+":"\u2212";var ac=isIn?"var(--teal)":"var(--coral)";h+='<div class="mov-item"><div class="mov-dot" style="background:'+dc+'"></div><div class="mov-body"><div class="mov-cat">'+tx.category+(tx.subcategory?' <span style="color:var(--t3);font-weight:400">\u203a '+tx.subcategory+'</span>':'')+'</div><div class="mov-sub">'+(tx.description||"")+(tx.date?" \u00b7 "+tx.date:"")+(isE?" \u00b7 Est.":"")+'</div></div><div class="mov-amt" style="color:'+ac+'">'+sg+fmt(tx.amount)+'</div><div class="mov-acts"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button><button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
+  h+='<div class="reg-grid">';
+
+  // INGRESOS column
+  h+='<div class="card reg-col"><h3 style="color:var(--teal)">INGRESOS</h3>';
+  h+='<table class="reg-table"><thead><tr><th>Categoría</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th></tr></thead><tbody>';
+  if(ingRows.length===0) h+='<tr><td colspan="4" style="text-align:center;color:var(--t3);padding:20px">Sin ingresos</td></tr>';
+  else{ingRows.forEach(function(r){
+    var v=r.real-r.est;var vc=v>=0?"var-pos":"var-neg";var vs=v>=0?"+":"";
+    h+='<tr><td>'+r.name+(r.desc?' <span style="color:var(--t3)">'+r.desc+'</span>':'')+'</td>';
+    h+='<td style="text-align:right;color:var(--t3)">'+fmt(r.est)+'</td>';
+    h+='<td style="text-align:right;font-weight:700">'+fmt(r.real)+'</td>';
+    h+='<td style="text-align:right" class="'+(r.est>0?vc:"")+'">'+(r.est>0?vs+fmt(v):"—")+'</td></tr>';
+  });}
+  var vi=totIngReal-totIngEst;var vic=vi>=0?"var-pos":"var-neg";
+  h+='<tr class="reg-total"><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
+  h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td></tr>';
+  h+='</tbody></table></div>';
+
+  // EGRESOS column
+  h+='<div class="card reg-col"><h3 style="color:var(--coral)">EGRESOS</h3>';
+  h+='<table class="reg-table"><thead><tr><th>Categoría</th><th>Descripción</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th></tr></thead><tbody>';
+  if(egRows.length===0) h+='<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:20px">Sin egresos</td></tr>';
+  else{egRows.forEach(function(r){
+    var v=r.real-r.est;var vc=v>0?"var-neg":"var-pos";var vs=v>0?"+":"";
+    h+='<tr><td>'+r.name+'</td><td style="color:var(--t3)">'+(r.sub||r.desc||"")+'</td>';
+    h+='<td style="text-align:right;color:var(--t3)">'+fmt(r.est)+'</td>';
+    h+='<td style="text-align:right;font-weight:700">'+fmt(r.real)+'</td>';
+    h+='<td style="text-align:right" class="'+(r.est>0?vc:"")+'">'+(r.est>0?vs+fmt(v):"—")+'</td></tr>';
+  });}
+  var ve=totEgReal-totEgEst;var vec=ve>0?"var-neg":"var-pos";
+  h+='<tr class="reg-total"><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
+  h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td></tr>';
+  h+='</tbody></table></div>';
+
+  h+='</div>';
   Q("page").innerHTML=h;
 }
 
