@@ -145,6 +145,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .reg-pag button{background:var(--bg);border:1px solid var(--border);color:var(--t2);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
 .reg-pag button:hover{color:var(--text);border-color:var(--teal)}
 .reg-pag span{font-size:11px;color:var(--t3);padding:4px 8px}
+
+.cat-mgr{margin-top:20px}
+.cat-mgr-title{font-size:13px;font-weight:700;margin-bottom:10px}
+.cat-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(42,63,85,.2);font-size:12px}
+.cat-item:last-child{border-bottom:none}
+.cat-main{font-weight:600;min-width:120px}
+.cat-subs{flex:1;color:var(--t2)}
+.cat-add-row{display:flex;gap:6px;margin-top:8px}
+.cat-add-row .input{flex:1;padding:7px 10px;font-size:12px}
+.cat-add-btn{background:var(--card2);color:var(--teal);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
 .act-cell{white-space:nowrap;text-align:right}
 .var-pos{color:var(--teal)}.var-neg{color:var(--coral)}
 .kpi-est{font-size:11px;color:var(--t3);margin-top:6px}
@@ -191,9 +201,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button class="active" id="btnDash" onclick="setPage('dash')">Dashboard</button>
       <button id="btnReg" onclick="setPage('reg')">Registro</button>
     </div>
-    <div class="toggle-grp">
-      <button class="active" id="btnCur" onclick="setView(0)">Mes actual</button>
-      <button id="btnPrev" onclick="setView(-1)">Mes anterior</button>
+    <div style="display:flex;gap:6px;align-items:center">
+      <select id="selMo" class="sel" style="min-width:90px" onchange="setMo()"></select>
+      <select id="selYr" class="sel" onchange="setMo()">
+        <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
+      </select>
     </div>
   </div>
 </div>
@@ -234,22 +246,27 @@ var S={
   txns:JSON.parse(localStorage.getItem("fp-txns")||"[]"),
   inv:JSON.parse(localStorage.getItem("fp-inv")||"[]"),
   goals:JSON.parse(localStorage.getItem("fp-goals")||"[]"),
-  vOff:0,pg:"dash"
+  viewM:new Date().getMonth(),customCats:JSON.parse(localStorage.getItem("fp-cats")||"[]"),viewY:new Date().getFullYear(),pg:"dash"
 };
 
-function setPage(p){S.pg=p;Q("btnDash").classList.toggle("active",p==="dash");Q("btnReg").classList.toggle("active",p==="reg");render()}
+function setPage(p){S.pg=p;Q("btnDash").classList.toggle("active",p==="dash");Q("btnReg").classList.toggle("active",p==="reg");S.regPageI=0;S.regPageE=0;render()}
 var CH={};
 var now=new Date();
 
 function fmt(n){return"$ "+new Intl.NumberFormat("es-AR",{maximumFractionDigits:0}).format(n)}
 function Q(id){return document.getElementById(id)}
-function sv(){localStorage.setItem("fp-txns",JSON.stringify(S.txns));localStorage.setItem("fp-inv",JSON.stringify(S.inv));localStorage.setItem("fp-goals",JSON.stringify(S.goals))}
+function sv(){localStorage.setItem("fp-txns",JSON.stringify(S.txns));localStorage.setItem("fp-inv",JSON.stringify(S.inv));localStorage.setItem("fp-goals",JSON.stringify(S.goals));localStorage.setItem("fp-cats",JSON.stringify(S.customCats))}
 function toast(m){var t=Q("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2200)}
 function kc(){Object.values(CH).forEach(function(c){try{c.destroy()}catch(e){}});CH={}}
 Chart.defaults.color="#5a6f82";Chart.defaults.font.family="Inter";
 
-function curM(){var m=now.getMonth()+S.vOff,y=now.getFullYear();while(m<0){m+=12;y--}while(m>11){m-=12;y++}return{m:m,y:y}}
-function setView(off){S.vOff=off;Q("btnCur").classList.toggle("active",off===0);Q("btnPrev").classList.toggle("active",off===-1);render()}
+function curM(){return{m:S.viewM,y:S.viewY}}
+function setMo(){S.viewM=+Q("selMo").value;S.viewY=+Q("selYr").value;render()}
+function initSelectors(){
+  var sel=Q("selMo");sel.innerHTML="";
+  MO.forEach(function(m,i){var o=document.createElement("option");o.value=i;o.textContent=m;sel.appendChild(o)});
+  sel.value=S.viewM;Q("selYr").value=S.viewY;
+}
 
 function gmt(m,y){return S.txns.filter(function(t){return t.month===m&&t.year===y})}
 function gsum(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){return s+(x.realAmt||x.amount||0)},0)}
@@ -263,8 +280,18 @@ function render(){
   kc();
   var c=curM(),t=gmt(c.m,c.y),inc=gsum(t,"ingreso"),exp=gsum(t,"egreso"),bal=inc-exp;
   var sr=inc>0?Math.round((inc-exp)/inc*100):0;
+  // Carry-over: sum all previous months net balance
+  var carry=0;
+  S.txns.forEach(function(tx){
+    if(tx.year<c.y||(tx.year===c.y&&tx.month<c.m)){
+      var amt=tx.realAmt||tx.amount||0;
+      if(tx.type==="ingreso")carry+=amt;else carry-=amt;
+    }
+  });
+  var totalBal=carry+bal;
 
   Q("monthBadge").textContent=MO[c.m]+" "+c.y;
+  Q("selMo").value=c.m;Q("selYr").value=c.y;
 
   if(S.pg==="reg") return renderReg(c,t);
 
@@ -281,6 +308,9 @@ function render(){
   h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',false,incEst,"var(--teal)");
   h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true,expEst,"var(--coral)");
   h+=kpiCard("Balance neto",bal,balChg,"ic-bal",'<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>',false,0,"var(--blue)");
+  if(carry!==0){
+    h+='<div class="card" style="border-top:3px solid var(--purple)"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span><div class="kpi-label">Balance acumulado</div><div class="kpi-val" style="color:'+(totalBal>=0?"var(--teal)":"var(--coral)")+'">'+fmt(totalBal)+'</div><div class="kpi-est">Mes anterior: <b>'+fmt(carry)+'</b> \u00b7 Este mes: <b>'+fmt(bal)+'</b></div></div>';
+  }
   h+='<div class="card"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><div class="kpi-label">Tasa de ahorro</div><div class="kpi-val">'+sr+'%</div><div class="kpi-change '+(sr>=20?"kpi-up":"kpi-down")+'">'+(sr>=20?"Buen ritmo":"Ajustar gastos")+'</div></div>';
   h+='</div>';
 
@@ -392,6 +422,18 @@ function renderReg(c,t){
   h+='</div>';
 
   h+='</div>';
+
+  // Category manager
+  h+='<div class="card cat-mgr" style="margin-top:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span>Gestionar categor\u00edas</div>';
+  h+='<div class="card-sub">Agreg\u00e1 subcategor\u00edas o nuevas categor\u00edas de egreso</div>';
+  EC.forEach(function(cat,ci){
+    h+='<div class="cat-item"><div class="cat-main" style="color:'+cat.cl+'">'+cat.n+'</div>';
+    h+='<div class="cat-subs">'+cat.sc.join(", ")+'</div>';
+    h+='<div><button class="btn-icon" onclick="promptAddSub('+ci+')" title="Agregar sub">+ sub</button></div></div>';
+  });
+  h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button></div>';
+  h+='</div>';
+
   Q("page").innerHTML=h;
 }
 
@@ -552,6 +594,23 @@ function saveGoal(){
   sv();closeModal();toast("Meta guardada ✓");render();
 }
 
+
+function promptAddSub(catIdx){
+  var name=prompt("Nueva subcategor\u00eda para "+EC[catIdx].n+":");
+  if(!name)return;
+  EC[catIdx].sc.push(name.trim());
+  S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice()}});
+  sv();toast("Subcategor\u00eda agregada");render();
+}
+function addNewCat(){
+  var name=Q("newCatName").value.trim();
+  if(!name)return toast("Pon\u00e9 un nombre");
+  var subs=Q("newCatSub").value.split(",").map(function(s){return s.trim()}).filter(function(s){return s});
+  var colors=["#5dadec","#ffd166","#ff6b8a","#b68eff","#4ecdc4","#fab387","#89b4fa","#f7aef8"];
+  EC.push({n:name,sc:subs.length?subs:["General"],cl:colors[EC.length%colors.length]});
+  S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice()}});
+  sv();toast("Categor\u00eda creada");render();
+}
 function editInv(id){openModal("inv",id)}
 function delMov(id){if(!confirm("¿Eliminar movimiento?"))return;S.txns=S.txns.filter(function(t){return t.id!==id});sv();toast("Eliminado");render()}
 function delInv(id){if(!confirm("¿Eliminar inversión?"))return;S.inv=S.inv.filter(function(i){return i.id!==id});sv();toast("Eliminada");render()}
@@ -563,6 +622,11 @@ function addToGoal(id){
   sv();toast("Ahorro sumado ✓");render();
 }
 
+// Load custom categories
+if(S.customCats.length>0){
+  EC.length=0;
+  S.customCats.forEach(function(cc){EC.push({n:cc.n,sc:cc.sc.slice(),cl:cc.cl||"#5dadec"})});
+}
 // Migrate old data
 S.txns=S.txns.map(function(t){
   if(t.estimated!==undefined) return t;
@@ -573,7 +637,7 @@ S.inv=S.inv.map(function(i){return i.risk!==undefined?i:Object.assign({},i,{risk
 S.goals=S.goals.map(function(g){return g.monthly!==undefined?g:Object.assign({},g,{monthly:0})});
 sv();
 
-if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",render)}else{render()}
+if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){initSelectors();render()})}else{initSelectors();render()}
 </script>
 </body>
 </html>
