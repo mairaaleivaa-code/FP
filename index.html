@@ -323,8 +323,9 @@ function renderReg(c,t){
     var cats={};
     arr.filter(function(x){return x.type===tp}).forEach(function(x){
       var key=x.category+(x.subcategory?" - "+x.subcategory:"")+(x.description?" - "+x.description:"");
-      if(!cats[key])cats[key]={name:x.category,sub:x.subcategory||"",desc:x.description||"",est:0,real:0};
+      if(!cats[key])cats[key]={name:x.category,sub:x.subcategory||"",desc:x.description||"",est:0,real:0,ids:[]};
       if(x.mode==="estimado")cats[key].est+=x.amount;else cats[key].real+=x.amount;
+      cats[key].ids.push(x.id);
     });
     return Object.values(cats).sort(function(a,b){return(b.est+b.real)-(a.est+a.real)});
   }
@@ -372,36 +373,22 @@ function renderReg(c,t){
 
   h+='</div>';
 
-  // Individual items with edit/delete
-  var allTxns=t.slice().sort(function(a,b){return(b.date||"").localeCompare(a.date||"")||(+b.id)-(+a.id)});
-  if(allTxns.length>0){
-    h+='<div class="card" style="margin-top:16px;padding:12px 18px"><div class="card-title" style="margin-bottom:10px"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>Detalle de movimientos</div>';
-    allTxns.forEach(function(tx){
-      var isIn=tx.type==="ingreso";
-      var isE=tx.mode==="estimado";
-      var dc=isE?"var(--gold)":isIn?"var(--teal)":"var(--coral)";
-      var sg=isIn?"+":"\u2212";
-      var ac=isIn?"var(--teal)":"var(--coral)";
-      h+='<div class="mov-item"><div class="mov-dot" style="background:'+dc+'"></div>';
-      h+='<div class="mov-body"><div class="mov-cat">'+tx.category+(tx.subcategory?' <span style="color:var(--t3)">\u203a '+tx.subcategory+'</span>':'')+'</div>';
-      h+='<div class="mov-sub">'+(tx.description||"")+(tx.date?" \u00b7 "+tx.date:"")+(isE?" \u00b7 Est.":"")+'</div></div>';
-      h+='<div class="mov-amt" style="color:'+ac+'">'+sg+fmt(tx.amount)+'</div>';
-      h+='<div class="mov-acts"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button>';
-      h+='<button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></div></div>';
-    });
-    h+='</div>';
-  }
-
   Q("page").innerHTML=h;
 }
 
 
-function kpiCard(label,val,chg,iconCls,iconSvg,invertColor){
+function kpiCard(label,val,chg,iconCls,iconSvg,invertColor,est,accentColor){
   var isUp=invertColor?chg<0:chg>0;
-  var arrow=chg>0?"↑":chg<0?"↓":"→";
+  var arrow=chg>0?"\u2191":chg<0?"\u2193":"\u2192";
   var cls=isUp?"kpi-up":"kpi-down";
   if(chg===0) cls="";
-  return '<div class="card" style="border-top:3px solid '+(accentColor||'var(--border)')+'">'+'<span class="kpi-icon '+iconCls+'">'+iconSvg+'</span><div class="kpi-label">'+label+'</div><div class="kpi-val">'+fmt(val)+'</div><div class="kpi-change '+cls+'">'+arrow+Math.abs(chg)+'% vs mes ant.</div></div>';
+  var estHtml="";
+  if(est>0){
+    var v=val-est;var vc;
+    if(invertColor){vc=v>0?"var-neg":"var-pos"}else{vc=v>=0?"var-pos":"var-neg"}
+    estHtml='<div class="kpi-est">Est: <b>'+fmt(est)+'</b> \u00b7 <span class="'+vc+'" style="font-weight:700">'+(v>=0?"+":"")+fmt(v)+'</span></div>';
+  }
+  return '<div class="card" style="border-top:3px solid '+(accentColor||'var(--border)')+'"><span class="kpi-icon '+iconCls+'">'+iconSvg+'</span><div class="kpi-label">'+label+'</div><div class="kpi-val">'+fmt(val)+'</div><div class="kpi-change '+cls+'">'+arrow+Math.abs(chg)+'% vs mes ant.</div>'+estHtml+'</div>';
 }
 
 function initCharts(c){
