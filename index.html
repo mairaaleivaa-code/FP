@@ -201,7 +201,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button id="btnReg" onclick="setPage('reg')">Registro</button>
     </div>
     <select id="selMo" class="sel" style="min-width:90px;background:var(--teal);color:#0d1b2a;border:none;font-weight:700;border-radius:20px;padding:7px 16px;cursor:pointer" onchange="setMo()"></select>
-    <select id="selYr" class="sel" style="min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-weight:600;cursor:pointer" onchange="setMo()">
+    <select id="selYr" class="sel" style="min-width:70px;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-weight:600;cursor:pointer" onchange="setMo()">
       <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
     </select>
     <div id="monthBadge" style="display:none"></div>
@@ -327,7 +327,9 @@ function render(){
 
   h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div>';
   if(incData.length===0) h+='<div class="empty-msg">Sin ingresos</div>';
-  else{var mi=incData[0].value;incData.forEach(function(d){h+='<div class="inc-row"><div class="inc-name">'+d.name+'</div><div class="inc-bar-wrap"><div class="inc-bar" style="width:'+Math.round(d.value/mi*100)+'%"></div></div><div class="inc-val">'+fmt(d.value)+'</div></div>';})}
+  else{var mi=incData[0].value;incData.forEach(function(d){
+      var srcEst=t.filter(function(x){return x.type==="ingreso"&&x.category===d.name}).reduce(function(s,x){return s+(x.estimated||0)},0);
+      h+='<div class="inc-row"><div class="inc-name">'+d.name+(srcEst?'<div style="font-size:9px;color:var(--t3)">Est: '+fmt(srcEst)+'</div>':'')+'</div><div class="inc-bar-wrap"><div class="inc-bar" style="width:'+Math.round(d.value/mi*100)+'%"></div></div><div class="inc-val">'+fmt(d.value)+'</div></div>';})}
   h+='</div>';
 
   h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div><div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
@@ -381,7 +383,7 @@ function renderReg(c,t){
     h+='<td class="act-cell"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button> <button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></td></tr>';
   });}
   h+='</tbody>';
-  var vi=totIngReal-totIngEst;var vic=vi>=0?"var-pos":"var-neg";
+  var vi=totIngEst>0?(totIngReal-totIngEst):0;var vic=vi>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
   h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td><td></td></tr></tfoot>';
   h+='</table>';
@@ -408,7 +410,7 @@ function renderReg(c,t){
     h+='<td class="act-cell"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button> <button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></td></tr>';
   });}
   h+='</tbody>';
-  var ve=totEgReal-totEgEst;var vec=ve>0?"var-neg":"var-pos";
+  var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>0?"var-neg":"var-pos";
   h+='<tfoot><tr class="reg-total"><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
   h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td><td></td></tr></tfoot>';
   h+='</table>';
