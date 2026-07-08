@@ -133,7 +133,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .btn-icon:hover{color:var(--text);background:rgba(255,255,255,.05)}
 
 
-.reg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.reg-grid{display:grid;grid-template-columns:2fr 3fr;gap:16px;align-items:start}
 .reg-col{display:flex;flex-direction:column}
 .reg-col h3{font-size:14px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .reg-table{width:100%;font-size:12px;border-collapse:collapse}
@@ -453,7 +453,8 @@ function renderReg(c,t){
     var am=getAmounts(tx);
     var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
     var vc=hasV?(v>0?"var-neg":"var-pos"):"";
-    var detail=tx.subcategory||tx.description||"";
+    var detail=tx.subcategory||"";
+    if(tx.description) detail+=(detail?" · ":"")+tx.description;
     var isChk=tx.checked?"checked":"";
     h+='<tr class="chk-row'+(tx.checked?" checked":"")+'"><td><input type="checkbox" class="chk" '+isChk+' onchange="toggleCheck(\''+tx.id+'\',this.checked)"></td><td>'+tx.category+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
     h+='<td style="color:var(--t3)">'+detail+'</td>';
