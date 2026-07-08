@@ -33,6 +33,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .r4{grid-template-columns:repeat(4,1fr)}
 .r2{grid-template-columns:3fr 2fr}
 .r3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.r3>div{overflow:hidden}
 .r2eq{grid-template-columns:repeat(3,1fr)}
 
 /* CARDS */
@@ -366,11 +367,11 @@ function render(){
 
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>Inversiones<button style="margin-left:8px;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'inv\')">+</button></div>';
   if(S.inv.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin inversiones</div></div>';
-  else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r3" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+(inv.notes?' <span style="color:var(--t2);font-weight:400">| '+inv.notes+'</span>':'')+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')">editar</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
+  else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r3" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+(inv.notes?' <span style="color:var(--t2);font-weight:400">| '+inv.notes+'</span>':'')+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+(inv.date?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Desde: '+inv.date+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')">editar</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
 
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas<button style="margin-left:8px;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'meta\')">+</button></div>';
   if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas</div></div>';
-  else{h+='<div class="row r2eq">';S.goals.forEach(function(g){var p=Math.min(100,Math.round(g.saved/g.target*100));var rm=Math.max(0,g.target-g.saved);var mo=g.monthly||0;var ml=mo>0?Math.ceil(rm/mo):0;var pc=p>=100?"var(--teal)":p>60?"var(--blue)":"var(--gold)";h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="goal-name">'+g.name+'</div>'+(g.where?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Ubicada en: '+g.where+'</div>':'')+'</div><div style="display:flex;gap:2px"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">editar</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">\u00d7</button></div></div><div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pc+';font-weight:700">'+p+'%</span></div><div class="prog-bg"><div class="prog-fill" style="width:'+p+'%;background:'+pc+'"></div></div><div class="goal-info">';if(mo>0){h+='Aporte: <b style="color:var(--text)">'+fmt(mo)+'/mes</b> · ';if(rm>0)h+='Falta '+fmt(rm)+' · <b style="color:var(--teal)">'+(ml>12?(Math.floor(ml/12)+' a\u00f1o'+(Math.floor(ml/12)>1?'s':'')+' y '+(ml%12)+' meses'):(ml+(ml===1?' mes':' meses')))+'</b>';else h+='<b style="color:var(--teal)">Meta alcanzada</b>';}else{h+='Falta: '+fmt(rm);}h+='</div><div style="display:flex;gap:6px;margin-top:10px"><input type="number" inputmode="numeric" class="input" style="flex:1;padding:8px 10px;font-size:12px" placeholder="Sumar..." id="ga_'+g.id+'"><button style="background:var(--card);color:var(--teal);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit" onclick="addToGoal(\''+g.id+'\')">+</button></div></div>';});h+='</div>';}
+  else{h+='<div class="row r2eq">';S.goals.slice().sort(function(a,b){var ord={corto:0,mediano:1,largo:2};return(ord[a.plazo]||1)-(ord[b.plazo]||1)}).forEach(function(g){var p=Math.min(100,Math.round(g.saved/g.target*100));var rm=Math.max(0,g.target-g.saved);var mo=g.monthly||0;var ml=mo>0?Math.ceil(rm/mo):0;var pc=p>=100?"var(--teal)":p>60?"var(--blue)":"var(--gold)";h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="goal-name">'+g.name+'</div>'+(g.where?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Ubicada en: '+g.where+'</div>':'')+'</div><div style="display:flex;gap:2px"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">editar</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">\u00d7</button></div></div><div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pc+';font-weight:700">'+p+'%</span></div><div class="prog-bg"><div class="prog-fill" style="width:'+p+'%;background:'+pc+'"></div></div><div class="goal-info">';if(mo>0){h+='Aporte: <b style="color:var(--text)">'+fmt(mo)+'/mes</b> · ';if(rm>0)h+='Falta '+fmt(rm)+' · <b style="color:var(--teal)">'+(ml>12?(Math.floor(ml/12)+' a\u00f1o'+(Math.floor(ml/12)>1?'s':'')+' y '+(ml%12)+' meses'):(ml+(ml===1?' mes':' meses')))+'</b>';else h+='<b style="color:var(--teal)">Meta alcanzada</b>';}else{h+='Falta: '+fmt(rm);}h+='</div><div style="display:flex;gap:6px;margin-top:10px"><input type="number" inputmode="numeric" class="input" style="flex:1;padding:8px 10px;font-size:12px" placeholder="Sumar..." id="ga_'+g.id+'"><button style="background:var(--card);color:var(--teal);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit" onclick="addToGoal(\''+g.id+'\')">+</button></div></div>';});h+='</div>';}
 
   Q("page").innerHTML=h;
   initCharts(c);
@@ -571,7 +572,7 @@ function openModal(type,id){
     else formData={instrument:"",broker:"",amount:"",date:"",notes:"",risk:0,returnPct:""}
   }else if(type==="meta"){
     if(id){var g=S.goals.find(function(x){return x.id===id});if(g)formData=Object.assign({},g)}
-    else formData={name:"",target:"",saved:0,monthly:"",icon:"otro",deadline:"",notes:""}
+    else formData={name:"",target:"",saved:0,monthly:"",icon:"otro",plazo:"mediano",deadline:"",notes:""}
   }
   renderModal();
 }
@@ -606,7 +607,7 @@ function renderMovModal(){
   }
   h+='<input id="mDesc" class="input" placeholder="Descripción (opcional)" value="'+(f.description||"")+'">';
   h+='<div class="form-row"><div><div class="form-label">Estimado</div><input id="mEst" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.estimated?fmtInput(f.estimated):"")+'" oninput="this.value=fmtInput(this.value)"></div>';
-  h+='<div><div class="form-label">Real</div><input id="mReal" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.realAmt?fmtInput(f.realAmt):"")+'" oninput="this.value=fmtInput(this.value)"></div></div>';
+  h+='<div><div class="form-label">Real</div><input id="mReal" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.realAmt?f.realAmt?fmtInput(f.realAmt):"":"")+'" oninput="this.value=fmtInput(this.value)"></div></div>';
   h+='<div style="position:relative"><div class="form-label">Fecha</div><input id="mDate" class="input" type="date" value="'+(f.date||"")+'" style="padding-right:40px"><div style="position:absolute;right:12px;bottom:11px;color:var(--t2);font-size:16px;pointer-events:none">&#128197;</div></div>';
   h+='<button class="btn btn-teal" onclick="saveMov()">'+(editId?"Guardar":"Registrar")+'</button></div>';
   return h;
@@ -640,10 +641,18 @@ function renderMetaModal(){
   var h='<h2>'+(editId?"Editar":"Nueva")+' meta<button class="close" onclick="closeModal()">✕</button></h2>';
   h+='<div class="form-stack">';
   h+='<input id="gN" class="input" placeholder="Nombre de la meta" value="'+(f.name||"")+'">';
+  h+='<div class="form-label">Plazo</div>';
+  h+='<div style="display:flex;gap:6px;margin-bottom:10px">';
+  var plazos=[{k:"corto",l:"Corto plazo"},{k:"mediano",l:"Mediano plazo"},{k:"largo",l:"Largo plazo"}];
+  plazos.forEach(function(pl){
+    var isA=(f.plazo||"mediano")===pl.k;
+    h+='<button type="button" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(74,125,255,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.plazo=\''+pl.k+'\';renderModal()">'+pl.l+'</button>';
+  });
+  h+='</div>';
 
-  h+='<div class="form-row"><div><div class="form-label">Monto objetivo</div><input id="gT" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.target||"")+'"></div>';
-  h+='<div><div class="form-label">Ya ahorrado</div><input id="gS" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.saved||"0")+'"></div></div>';
-  h+='<input id="gM" class="input" type="number" inputmode="numeric" placeholder="Aporte mensual estimado" value="'+(f.monthly||"")+'">';
+  h+='<div class="form-row"><div><div class="form-label">Monto objetivo</div><input id="gT" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.target||"")+'"></div>';
+  h+='<div><div class="form-label">Ya ahorrado</div><input id="gS" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.saved||"0")+'"></div></div>';
+  h+='<input id="gM" class="input" inputmode="numeric" placeholder="Aporte mensual estimado" oninput="this.value=fmtInput(this.value)" value="'+(f.monthly||"")+'">';
   h+='<input id="gW" class="input" placeholder="Dónde está la plata (ej: Naranja X, Plazo fijo...)" value="'+(f.where||"")+'">';
   h+='<div style="position:relative"><div class="form-label">Fecha l\u00edmite</div><input id="gDl" class="input" type="date" value="'+(f.deadline||"")+'" style="padding-right:40px"><div style="position:absolute;right:12px;bottom:11px;color:var(--t2);font-size:16px;pointer-events:none">&#128197;</div></div>';
   h+='<input id="gNo" class="input" placeholder="Notas" value="'+(f.notes||"")+'">';
@@ -671,9 +680,9 @@ function saveInv(){
   sv();closeModal();toast("Inversión registrada ✓");render();
 }
 function saveGoal(){
-  var name=Q("gN").value,target=parseFloat(Q("gT").value);
+  var name=Q("gN").value,target=parseInput(Q("gT").value);
   if(!name||!target)return toast("Completá nombre y monto");
-  var e={name:name,target:target,saved:parseFloat(Q("gS").value)||0,monthly:parseFloat(Q("gM").value)||0,icon:formData.icon||"otro",where:Q("gW").value,deadline:Q("gDl").value,notes:Q("gNo").value,id:editId||Date.now().toString()};
+  var e={name:name,target:target,saved:parseInput(Q("gS").value),monthly:parseInput(Q("gM").value),icon:formData.icon||"otro",plazo:formData.plazo||"mediano",where:Q("gW").value,deadline:Q("gDl").value,notes:Q("gNo").value,id:editId||Date.now().toString()};
   if(editId){S.goals=S.goals.map(function(g){return g.id===editId?e:g})}else{S.goals.push(e)}
   sv();closeModal();toast("Meta guardada ✓");render();
 }
