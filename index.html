@@ -200,7 +200,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button class="active" id="btnDash" onclick="setPage('dash')">Dashboard</button>
       <button id="btnReg" onclick="setPage('reg')">Registro</button>
     </div>
-    <select id="selMo" class="sel" style="min-width:110px;background:#2a3f55;color:#e2e8f0;border:1px solid #3a5570;font-weight:700;border-radius:20px;padding:7px 16px;cursor:pointer;font-size:13px" onchange="setMo()"></select>
+    <select id="selMo" class="sel" style="min-width:110px;background:#1b2838;color:#e2e8f0;border:1px solid #2a3f55;font-weight:600;border-radius:20px;padding:7px 16px;cursor:pointer;font-size:13px" onchange="setMo()"></select>
     <select id="selYr" class="sel" style="min-width:70px;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-weight:600;cursor:pointer" onchange="setMo()">
       <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
     </select>
@@ -382,12 +382,14 @@ function renderReg(c,t){
   h+='<tbody class="reg-body">';
   if(ingTxns.length===0) h+='<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:20px">Sin ingresos</td></tr>';
   else{ingPage.forEach(function(tx){
-    var isE=tx.mode==="estimado";
+    var am=getAmounts(tx);
+    var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
+    var vc=hasV?(v>=0?"var-pos":"var-neg"):"";
     var label=tx.category+(tx.description?" - "+tx.description:"");
-    h+='<tr><td>'+(isE?'<span style="color:var(--gold);font-size:9px">EST</span> ':'')+label+'</td>';
-    h+='<td style="text-align:right;color:var(--t3)">'+(isE?fmt(tx.amount):"—")+'</td>';
-    h+='<td style="text-align:right;font-weight:700">'+(isE?"—":fmt(tx.amount))+'</td>';
-    h+='<td style="text-align:right">—</td>';
+    h+='<tr><td>'+label+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
+    h+='<td style="text-align:right;color:var(--t3)">'+(am.est?fmt(am.est):"—")+'</td>';
+    h+='<td style="text-align:right;font-weight:700">'+(am.real?fmt(am.real):"—")+'</td>';
+    h+='<td style="text-align:right" class="'+vc+'">'+(hasV?(v>=0?"+":"")+fmt(v):"—")+'</td>';
     h+='<td class="act-cell"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button> <button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></td></tr>';
   });}
   h+='</tbody>';
@@ -408,13 +410,15 @@ function renderReg(c,t){
   h+='<tbody class="reg-body">';
   if(egTxns.length===0) h+='<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px">Sin egresos</td></tr>';
   else{egPage.forEach(function(tx){
-    var isE=tx.mode==="estimado";
+    var am=getAmounts(tx);
+    var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
+    var vc=hasV?(v>0?"var-neg":"var-pos"):"";
     var detail=tx.subcategory||tx.description||"";
-    h+='<tr><td>'+(isE?'<span style="color:var(--gold);font-size:9px">EST</span> ':'')+tx.category+'</td>';
+    h+='<tr><td>'+tx.category+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
     h+='<td style="color:var(--t3)">'+detail+'</td>';
-    h+='<td style="text-align:right;color:var(--t3)">'+(isE?fmt(tx.amount):"—")+'</td>';
-    h+='<td style="text-align:right;font-weight:700">'+(isE?"—":fmt(tx.amount))+'</td>';
-    h+='<td style="text-align:right">—</td>';
+    h+='<td style="text-align:right;color:var(--t3)">'+(am.est?fmt(am.est):"—")+'</td>';
+    h+='<td style="text-align:right;font-weight:700">'+(am.real?fmt(am.real):"—")+'</td>';
+    h+='<td style="text-align:right" class="'+vc+'">'+(hasV?(v>0?"+":"")+fmt(v):"—")+'</td>';
     h+='<td class="act-cell"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button> <button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></td></tr>';
   });}
   h+='</tbody>';
