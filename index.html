@@ -9,12 +9,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0d1b2a;--card:#1b2838;--card2:#213040;--border:#2a3f55;
+  --bg:#0a1628;--card:#1b2838;--card2:#213040;--border:#2a3f55;
   --text:#e2e8f0;--t2:#8899aa;--t3:#5a6f82;
   --teal:#2dd4a8;--teal2:#25b890;--coral:#ff6b8a;--gold:#ffd166;--blue:#5dadec;--purple:#b68eff;--pink:#ff8fab;
   --r:16px;--r2:12px;
 }
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+body{background:linear-gradient(160deg,#0a1628 0%,#0f1f33 50%,#0a1628 100%);min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
 /* HEADER */
@@ -346,26 +346,26 @@ function render(){
   var incData=ggrp(t,"ingreso");
   h+='<div class="row r3">';
 
-  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Gastos por categoría</div>';
+  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Gastos por categoría</div>';
   if(catData.length===0) h+='<div class="empty-msg">Sin egresos</div>';
   else{var mx=catData[0].value;catData.filter(function(cd){return cd.value>0}).forEach(function(cd){var pct=exp>0?Math.round(cd.value/exp*100):0;var ec=EC.find(function(e){return e.n===cd.name});var cl=ec?ec.cl:"#5dadec";h+='<div class="cat-row"><div class="cat-dot" style="background:'+cl+'"></div><div class="cat-name">'+cd.name+'</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:'+Math.round(cd.value/mx*100)+'%;background:'+cl+'"></div></div><div class="cat-vals"><span class="cat-amt">'+fmt(cd.value)+'</span><span class="cat-pct">'+pct+'%</span></div></div>';})}
   h+='</div>';
 
-  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div>';
+  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div>';
   if(incData.length===0) h+='<div class="empty-msg">Sin ingresos</div>';
   else{var mi=incData[0].value;incData.forEach(function(d){
       var srcEst=t.filter(function(x){return x.type==="ingreso"&&x.category===d.name}).reduce(function(s,x){return s+getAmounts(x).est},0);
       h+='<div class="inc-row"><div class="inc-name">'+d.name+(srcEst?'<div style="font-size:9px;color:var(--t3)">Est: '+fmt(srcEst)+'</div>':'')+'</div><div class="inc-bar-wrap"><div class="inc-bar" style="width:'+Math.round(d.value/mi*100)+'%"></div></div><div class="inc-val">'+fmt(d.value)+'</div></div>';})}
   h+='</div>';
 
-  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div><div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
+  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div><div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
   h+='</div>';
 
-  h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>Inversiones <button style="margin-left:auto;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'inv\')">+</button></div>';
+  h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>Inversiones <button style="margin-left:auto;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'inv\')">+</button></div>';
   if(S.inv.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin inversiones</div></div>';
   else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r3" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div><div class="inv-ret" style="color:var(--teal)">+'+(inv.returnPct||0)+'% anual</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')">editar</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
 
-  h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(182,142,255,.08);color:var(--purple)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas <button style="margin-left:auto;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'meta\')">+</button></div>';
+  h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas <button style="margin-left:auto;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'meta\')">+</button></div>';
   if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas</div></div>';
   else{h+='<div class="row r2eq">';S.goals.forEach(function(g){var p=Math.min(100,Math.round(g.saved/g.target*100));var rm=Math.max(0,g.target-g.saved);var mo=g.monthly||0;var ml=mo>0?Math.ceil(rm/mo):0;var pc=p>=100?"var(--teal)":p>60?"var(--blue)":"var(--gold)";h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="goal-name">'+(GI[g.icon]||"\u25ce")+' '+g.name+'</div>'+(g.where?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Ubicada en: '+g.where+'</div>':'')+'</div><div style="display:flex;gap:2px"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">editar</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">\u00d7</button></div></div><div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pc+';font-weight:700">'+p+'%</span></div><div class="prog-bg"><div class="prog-fill" style="width:'+p+'%;background:'+pc+'"></div></div><div class="goal-info">';if(mo>0){h+='Aporte: <b style="color:var(--text)">'+fmt(mo)+'/mes</b> · ';if(rm>0)h+='Falta '+fmt(rm)+' · <b style="color:var(--teal)">'+ml+(ml===1?' mes':' meses')+'</b>';else h+='<b style="color:var(--teal)">Meta alcanzada</b>';}else{h+='Falta: '+fmt(rm);}h+='</div><div style="display:flex;gap:6px;margin-top:10px"><input type="number" inputmode="numeric" class="input" style="flex:1;padding:8px 10px;font-size:12px" placeholder="Sumar..." id="ga_'+g.id+'"><button style="background:var(--card);color:var(--teal);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit" onclick="addToGoal(\''+g.id+'\')">+</button></div></div>';});h+='</div>';}
 
@@ -393,7 +393,7 @@ function renderReg(c,t){
   var ingPages=Math.ceil(ingTxns.length/PER)||1;
   var egPages=Math.ceil(egTxns.length/PER)||1;
 
-  var h='<div class="sec" style="margin-bottom:16px"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Registro '+MO[c.m]+' '+c.y+'</div>';
+  var h='<div class="sec" style="margin-bottom:16px"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Registro '+MO[c.m]+' '+c.y+'</div>';
   // Payment planner - above tables
   var allEg=t.filter(function(x){return x.type==="egreso"});
   var allIng=t.filter(function(x){return x.type==="ingreso"});
@@ -483,7 +483,7 @@ function renderReg(c,t){
   h+='</div>';
 
   // Category manager
-  h+='<div class="card cat-mgr" style="margin-top:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span>Gestionar categor\u00edas</div>';
+  h+='<div class="card cat-mgr" style="margin-top:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span>Gestionar categor\u00edas</div>';
   h+='<div class="card-sub">Agreg\u00e1 subcategor\u00edas o nuevas categor\u00edas de egreso</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
   EC.forEach(function(cat,ci){
@@ -539,6 +539,14 @@ function initCharts(c){
     },plugins:{legend:{labels:{font:{size:12},usePointStyle:true,pointStyle:"circle",padding:16}},
       tooltip:{backgroundColor:"#1b2838",titleFont:{family:"Inter",weight:"700"},bodyFont:{family:"Inter"},padding:14,cornerRadius:10,borderColor:"#2a3f55",borderWidth:1,callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw)}}}
     }}});
+  }
+  // Category pie chart
+  var catPieEl=Q("catPie");
+  if(catPieEl){
+    var pieD=ggrp(gmt(c.m,c.y),"egreso");
+    var pieFiltered=pieD.filter(function(d){return d.value>0});
+    var pieCols=pieFiltered.map(function(d){var ec=EC.find(function(e){return e.n===d.name});return ec?ec.cl:"#5dadec"});
+    CH.catPie=new Chart(catPieEl,{type:"doughnut",data:{labels:pieFiltered.map(function(d){return d.name}),datasets:[{data:pieFiltered.map(function(d){return d.value}),backgroundColor:pieCols,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,cutout:"60%",plugins:{legend:{display:false},tooltip:{backgroundColor:"#1b2838",padding:12,cornerRadius:10,callbacks:{label:function(ctx){return ctx.label+": "+fmt(ctx.raw)}}}}}});
   }
   }catch(e){console.log("Charts unavailable")}
 }
@@ -622,15 +630,12 @@ function renderMetaModal(){
   var h='<h2>'+(editId?"Editar":"Nueva")+' meta<button class="close" onclick="closeModal()">✕</button></h2>';
   h+='<div class="form-stack">';
   h+='<input id="gN" class="input" placeholder="Nombre de la meta" value="'+(f.name||"")+'">';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
-  var iconLabels={emergencia:"Emergencia",cirugia:"Salud",emprendimiento:"Negocio",viaje:"Viaje",tech:"Tech",auto:"Auto",educacion:"Estudios",otro:"Otro"};
-  Object.keys(iconLabels).forEach(function(k){h+='<button style="background:'+(f.icon===k?"rgba(45,212,168,.15)":"var(--bg)")+';border:1.5px solid '+(f.icon===k?"var(--teal)":"var(--border)")+';border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:'+(f.icon===k?"var(--teal)":"var(--t2)")+'" onclick="formData.icon=\''+k+'\';renderModal()">'+iconLabels[k]+'</button>'});
-  h+='</div>';
-  h+='<div class="form-row"><input id="gT" class="input" type="number" inputmode="numeric" placeholder="Monto objetivo" value="'+(f.target||"")+'">';
-  h+='<input id="gS" class="input" type="number" inputmode="numeric" placeholder="Ya ahorrado" value="'+(f.saved||"0")+'"></div>';
+
+  h+='<div class="form-row"><div><div class="form-label">Monto objetivo</div><input id="gT" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.target||"")+'"></div>';
+  h+='<div><div class="form-label">Ya ahorrado</div><input id="gS" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.saved||"0")+'"></div></div>';
   h+='<input id="gM" class="input" type="number" inputmode="numeric" placeholder="Aporte mensual estimado" value="'+(f.monthly||"")+'">';
   h+='<input id="gW" class="input" placeholder="Dónde está la plata (ej: Naranja X, Plazo fijo...)" value="'+(f.where||"")+'">';
-  h+='<input id="gDl" class="input" type="date" value="'+(f.deadline||"")+'">';
+  h+='<div style="position:relative"><div class="form-label">Fecha l\u00edmite</div><input id="gDl" class="input" type="date" value="'+(f.deadline||"")+'" style="padding-right:40px"><div style="position:absolute;right:12px;bottom:11px;color:var(--t2);font-size:16px;pointer-events:none">&#128197;</div></div>';
   h+='<input id="gNo" class="input" placeholder="Notas" value="'+(f.notes||"")+'">';
   h+='<button class="btn btn-purple" onclick="saveGoal()">'+(editId?"Guardar":"Crear meta")+'</button></div>';
   return h;
