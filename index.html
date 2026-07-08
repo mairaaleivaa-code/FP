@@ -32,7 +32,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .row{display:grid;gap:16px;margin-bottom:20px}
 .r4{grid-template-columns:repeat(4,1fr)}
 .r2{grid-template-columns:3fr 2fr}
-.r3{grid-template-columns:repeat(3,1fr)}
+.r3{grid-template-columns:1fr 1fr 1fr}
 .r2eq{grid-template-columns:repeat(3,1fr)}
 
 /* CARDS */
@@ -329,13 +329,15 @@ function render(){
   var expEst=gsumEst(t,"egreso");
 
   h+='<div class="row r4">';
-  h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',false,incEst,"var(--teal)",incEst-expEst);
-  h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true,expEst,"#ff5c7a");
-  h+='<div class="card" style="border-top:3px solid var(--teal);background:linear-gradient(135deg,#111927,#131f35);box-shadow:0 0 30px rgba(74,125,255,.12)"><span class="kpi-icon ic-bal"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg></span><div class="kpi-label" style="color:var(--teal)">SALDO</div><div class="kpi-val" style="font-size:32px;color:var(--text)">'+fmt(bal)+'</div><div class="kpi-change '+(balChg>=0?"kpi-up":"kpi-down")+'">'+(balChg>=0?"↑":"↓")+Math.abs(balChg)+'% vs mes ant.</div></div>';
+  h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',false,0,"#4ade80");
+  h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true,0,"#ff5c7a");
+  h+='<div class="card" style="border-top:3px solid var(--teal);background:linear-gradient(135deg,#111927,#131f35);box-shadow:0 0 30px rgba(74,125,255,.12)"><span class="kpi-icon" style="background:rgba(74,125,255,.12);color:var(--teal)"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg></span><div class="kpi-label" style="color:var(--text)">SALDO</div><div class="kpi-val" style="font-size:32px;color:var(--text)">'+fmt(bal)+'</div><div class="kpi-change" style="color:var(--text)">'+(balChg>=0?"↑":"↓")+Math.abs(balChg)+'% vs mes ant.</div></div>';
   if(carry!==0){
     h+='<div class="card" style="border-top:3px solid var(--purple)"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span><div class="kpi-label">Balance acumulado</div><div class="kpi-val" style="color:'+(totalBal>=0?"var(--teal)":"var(--coral)")+'">'+fmt(totalBal)+'</div><div class="kpi-est">Mes anterior: <b>'+fmt(carry)+'</b> \u00b7 Este mes: <b>'+fmt(bal)+'</b></div></div>';
   }
-  h+='<div class="card"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><div class="kpi-label">Tasa de ahorro</div><div class="kpi-val">'+sr+'%</div><div class="kpi-change" style="color:var(--t3)">'+(sr>=20?"Buen ritmo":"Ajustar gastos")+'</div></div>';
+  var estMargin=incEst-expEst;
+  var estHtml2=(incEst>0||expEst>0)?'<div class="kpi-est">Margen est: <b style="color:'+(estMargin>=0?"#4ade80":"#ff5c7a")+'">'+(estMargin>=0?"+":"")+fmt(estMargin)+'</b></div>':"";
+  h+='<div class="card"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><div class="kpi-label">Tasa de ahorro</div><div class="kpi-val">'+sr+'%</div><div class="kpi-change" style="color:var(--t3)">'+(sr>=20?"Buen ritmo":"Ajustar gastos")+'</div>'+estHtml2+'</div>';
   h+='</div>';
 
   // Estimated totals for dashboard
