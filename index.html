@@ -388,31 +388,41 @@ function renderReg(c,t){
   var h='<div class="sec" style="margin-bottom:16px"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Registro '+MO[c.m]+' '+c.y+'</div>';
   // Payment planner - above tables
   var allEg=t.filter(function(x){return x.type==="egreso"});
-  var selSum=allEg.filter(function(x){return x.checked}).reduce(function(s,x){return s+getAmounts(x).est},0);
-  var saldo=t.filter(function(x){return x.type==="ingreso"}).reduce(function(s,x){return s+getAmounts(x).real},0);
-  var resta=saldo-selSum;
-  if(allEg.length>0){
-    h+='<div class="card" style="margin-bottom:16px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-top:3px solid var(--teal)">';
-    h+='<div class="pay-counter-item">Gastos seleccionados<b style="color:var(--coral)">'+fmt(selSum)+'</b></div>';
-    h+='<div class="pay-counter-item">Saldo disponible<b style="color:var(--teal)">'+fmt(saldo)+'</b></div>';
-    h+='<div class="pay-counter-item">Resta<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
-    if(selSum>0) h+='<button style="background:none;border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit" onclick="clearChecks()">Limpiar</button>';
-    h+='</div>';
+  var allIng=t.filter(function(x){return x.type==="ingreso"});
+  var saldoActual=allIng.reduce(function(s,x){return s+getAmounts(x).real},0);
+  var faltaIng=allIng.filter(function(x){return x.checked&&getAmounts(x).est>0&&getAmounts(x).real===0}).reduce(function(s,x){return s+getAmounts(x).est},0);
+  var totalDisp=saldoActual+faltaIng;
+  var selGastos=allEg.filter(function(x){return x.checked}).reduce(function(s,x){return s+getAmounts(x).est},0);
+  var resta=totalDisp-selGastos;
+  if(allEg.length>0||allIng.length>0){
+    h+='<div class="card" style="margin-bottom:16px;padding:16px 20px;border-top:3px solid var(--teal)">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">';
+    h+='<div class="pay-counter-item">Saldo actual<b style="color:var(--teal)">'+fmt(saldoActual)+'</b></div>';
+    h+='<div class="pay-counter-item">Falta ingresar<b style="color:var(--gold)">'+(faltaIng>0?"+":"")+fmt(faltaIng)+'</b></div>';
+    h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Total disponible<b style="color:var(--text)">'+fmt(totalDisp)+'</b></div>';
+    h+='<div class="pay-counter-item">Gastos tildados<b style="color:var(--coral)">'+fmt(selGastos)+'</b></div>';
+    h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Resta<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
+    if(selGastos>0||faltaIng>0) h+='<button style="background:none;border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit" onclick="clearChecks()">Limpiar</button>';
+    h+='</div></div>';
   }
 
   h+='<div class="reg-grid">';
 
   // INGRESOS
   h+='<div class="card reg-col"><h3 style="color:var(--teal)">INGRESOS</h3>';
-  h+='<table class="reg-table"><thead><tr><th>Categoría</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
+  h+='<table class="reg-table"><thead><tr><th style="width:30px"></th><th>Categoría</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
   h+='<tbody class="reg-body">';
-  if(ingTxns.length===0) h+='<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:20px">Sin ingresos</td></tr>';
+  if(ingTxns.length===0) h+='<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px">Sin ingresos</td></tr>';
   else{ingPage.forEach(function(tx){
     var am=getAmounts(tx);
     var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
     var vc=hasV?(v>=0?"var-pos":"var-neg"):"";
     var label=tx.category+(tx.description?" - "+tx.description:"");
-    h+='<tr><td>'+label+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
+    var iChk=tx.checked?"checked":"";
+    var hasPending=am.est>0&&am.real===0;
+    h+='<tr class="chk-row'+(tx.checked?" checked":"")+'">';
+    h+='<td>'+(hasPending?'<input type="checkbox" class="chk" '+iChk+' onchange="toggleCheck(\''+tx.id+'\',this.checked)">':'')+'</td>';
+    h+='<td>'+label+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
     h+='<td style="text-align:right;color:var(--t3)">'+(am.est?fmt(am.est):"—")+'</td>';
     h+='<td style="text-align:right;font-weight:700">'+(am.real?fmt(am.real):"—")+'</td>';
     h+='<td style="text-align:right" class="'+vc+'">'+(hasV?(v>=0?"+":"")+fmt(v):"—")+'</td>';
@@ -420,7 +430,7 @@ function renderReg(c,t){
   });}
   h+='</tbody>';
   var vi=totIngEst>0?(totIngReal-totIngEst):0;var vic=vi>=0?"var-pos":"var-neg";
-  h+='<tfoot><tr class="reg-total"><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
+  h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
   h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td><td></td></tr></tfoot>';
   h+='</table>';
   if(ingPages>1){h+='<div class="reg-pag">';
@@ -678,7 +688,7 @@ function toggleCheck(id,val){
 function clearChecks(){
   var c=curM();
   S.txns=S.txns.map(function(t){
-    if(t.month===c.m&&t.year===c.y&&t.type==="egreso")return Object.assign({},t,{checked:false});
+    if(t.month===c.m&&t.year===c.y)return Object.assign({},t,{checked:false});
     return t;
   });
   sv();render();
