@@ -161,7 +161,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .chk-row{transition:background .2s}
 .chk-row.checked{background:rgba(45,212,168,.06)}
 .chk-row td:first-child{padding-left:6px}
-.chk{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;vertical-align:middle}
+.chk{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;vertical-align:middle;-webkit-appearance:none;appearance:none;border:2px solid var(--border);border-radius:4px;background:transparent;position:relative}
+.chk:checked{background:var(--teal);border-color:var(--teal)}
+.chk:checked::after{content:"\2713";color:#0d1b2a;font-size:11px;font-weight:700;position:absolute;top:-1px;left:2px}
 .pay-counter{position:sticky;bottom:0;background:var(--card);border-top:2px solid var(--border);padding:12px 16px;border-radius:0 0 var(--r) var(--r);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .pay-counter-item{font-size:12px;color:var(--t2)}
 .pay-counter-item b{font-size:14px;display:block;margin-top:2px}
@@ -222,8 +224,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 <div class="fab-row">
   <button class="fab" onclick="openModal('mov')">＋ Movimiento</button>
-  <button class="fab" onclick="openModal('inv')">＋ Inversión</button>
-  <button class="fab" onclick="openModal('meta')">＋ Meta</button>
 </div>
 
 <script>
@@ -361,11 +361,11 @@ function render(){
   h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div><div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
   h+='</div>';
 
-  h+='<div class="sec"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>Inversiones</div>';
+  h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>Inversiones <button style="margin-left:auto;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'inv\')">+</button></div>';
   if(S.inv.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin inversiones</div></div>';
   else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r3" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div><div class="inv-ret" style="color:var(--teal)">+'+(inv.returnPct||0)+'% anual</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')">editar</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
 
-  h+='<div class="sec"><span class="sec-icon" style="background:rgba(182,142,255,.08);color:var(--purple)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas</div>';
+  h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(182,142,255,.08);color:var(--purple)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas <button style="margin-left:auto;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'meta\')">+</button></div>';
   if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas</div></div>';
   else{h+='<div class="row r2eq">';S.goals.forEach(function(g){var p=Math.min(100,Math.round(g.saved/g.target*100));var rm=Math.max(0,g.target-g.saved);var mo=g.monthly||0;var ml=mo>0?Math.ceil(rm/mo):0;var pc=p>=100?"var(--teal)":p>60?"var(--blue)":"var(--gold)";h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="goal-name">'+(GI[g.icon]||"\u25ce")+' '+g.name+'</div>'+(g.where?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Ubicada en: '+g.where+'</div>':'')+'</div><div style="display:flex;gap:2px"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">editar</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">\u00d7</button></div></div><div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pc+';font-weight:700">'+p+'%</span></div><div class="prog-bg"><div class="prog-fill" style="width:'+p+'%;background:'+pc+'"></div></div><div class="goal-info">';if(mo>0){h+='Aporte: <b style="color:var(--text)">'+fmt(mo)+'/mes</b> · ';if(rm>0)h+='Falta '+fmt(rm)+' · <b style="color:var(--teal)">'+ml+(ml===1?' mes':' meses')+'</b>';else h+='<b style="color:var(--teal)">Meta alcanzada</b>';}else{h+='Falta: '+fmt(rm);}h+='</div><div style="display:flex;gap:6px;margin-top:10px"><input type="number" inputmode="numeric" class="input" style="flex:1;padding:8px 10px;font-size:12px" placeholder="Sumar..." id="ga_'+g.id+'"><button style="background:var(--card);color:var(--teal);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit" onclick="addToGoal(\''+g.id+'\')">+</button></div></div>';});h+='</div>';}
 
@@ -400,7 +400,7 @@ function renderReg(c,t){
   var totalIngReal=allIng.reduce(function(s,x){return s+getAmounts(x).real},0);
   var totalEgReal=allEg.reduce(function(s,x){return s+getAmounts(x).real},0);
   var saldoActual=totalIngReal-totalEgReal;
-  var faltaIng=allIng.filter(function(x){return x.checked&&getAmounts(x).est>0&&getAmounts(x).real===0}).reduce(function(s,x){return s+getAmounts(x).est},0);
+  var faltaIng=allIng.filter(function(x){return x.checked}).reduce(function(s,x){var a=getAmounts(x);var pending=a.est-a.real;return s+(pending>0?pending:0)},0);
   var totalDisp=saldoActual+faltaIng;
   var selGastos=allEg.filter(function(x){return x.checked}).reduce(function(s,x){return s+getAmounts(x).est},0);
   var resta=totalDisp-selGastos;
@@ -429,9 +429,8 @@ function renderReg(c,t){
     var vc=hasV?(v>=0?"var-pos":"var-neg"):"";
     var label=tx.category+(tx.description?" - "+tx.description:"");
     var iChk=tx.checked?"checked":"";
-    var hasPending=am.est>0&&am.real===0;
     h+='<tr class="chk-row'+(tx.checked?" checked":"")+'">';
-    h+='<td>'+(hasPending?'<input type="checkbox" class="chk" '+iChk+' onchange="toggleCheck(\''+tx.id+'\',this.checked)">':'')+'</td>';
+    h+='<td><input type="checkbox" class="chk" '+iChk+' onchange="toggleCheck(\''+tx.id+'\',this.checked)"></td>';
     h+='<td>'+label+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
     h+='<td style="text-align:right;color:var(--t3)">'+(am.est?fmt(am.est):"—")+'</td>';
     h+='<td style="text-align:right;font-weight:700">'+(am.real?fmt(am.real):"—")+'</td>';
