@@ -108,8 +108,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .input{background:var(--bg);color:var(--text);border:1.5px solid var(--border);border-radius:var(--r2);padding:11px 14px;font-size:14px;width:100%;outline:none;font-family:inherit;font-weight:500}
 .input:focus{border-color:var(--teal)}
 .input::placeholder{color:var(--t3)}
-.input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(0.8);cursor:pointer;opacity:1}
-.input[type="date"]{color-scheme:dark;position:relative}
+.input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) brightness(0.9);cursor:pointer;opacity:1;width:22px;height:22px}
+.input[type="date"]{color-scheme:dark}
+.input[type="number"]::-webkit-inner-spin-button,.input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.input[type="number"]{-moz-appearance:textfield}
 .date-wrap{position:relative}
 .date-wrap::after{content:"\1F4C5";position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:14px;filter:grayscale(1) brightness(2)}
 .form-stack{display:flex;flex-direction:column;gap:10px}
@@ -252,6 +254,8 @@ var CH={};
 var now=new Date();
 
 function fmt(n){n=Number(n);if(isNaN(n))n=0;return"$ "+new Intl.NumberFormat("es-AR",{maximumFractionDigits:0}).format(n)}
+function fmtInput(v){var n=String(v).replace(/[^\d]/g,"");if(!n)return"";return new Intl.NumberFormat("es-AR",{maximumFractionDigits:0}).format(Number(n))}
+function parseInput(v){return Number(String(v).replace(/[^\d]/g,""))||0}
 function Q(id){return document.getElementById(id)}
 function sv(){localStorage.setItem("fp-txns",JSON.stringify(S.txns));localStorage.setItem("fp-inv",JSON.stringify(S.inv));localStorage.setItem("fp-goals",JSON.stringify(S.goals));localStorage.setItem("fp-cats",JSON.stringify(S.customCats))}
 function toast(m){var t=Q("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2200)}
@@ -537,8 +541,8 @@ function renderMovModal(){
     h+='</datalist>';
   }
   h+='<input id="mDesc" class="input" placeholder="Descripción (opcional)" value="'+(f.description||"")+'">';
-  h+='<div class="form-row"><div><div class="form-label">Estimado</div><input id="mEst" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.estimated||"")+'"></div>';
-  h+='<div><div class="form-label">Real</div><input id="mReal" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.realAmt||"")+'"></div></div>';
+  h+='<div class="form-row"><div><div class="form-label">Estimado</div><input id="mEst" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.estimated?fmtInput(f.estimated):"")+'" oninput="this.value=fmtInput(this.value)"></div>';
+  h+='<div><div class="form-label">Real</div><input id="mReal" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.realAmt?fmtInput(f.realAmt):"")+'" oninput="this.value=fmtInput(this.value)"></div></div>';
   h+='<input id="mDate" class="input" type="date" value="'+(f.date||"")+'">';
   h+='<button class="btn btn-teal" onclick="saveMov()">'+(editId?"Guardar":"Registrar")+'</button></div>';
   return h;
@@ -586,8 +590,8 @@ function renderMetaModal(){
 // ===== SAVE FUNCTIONS =====
 function saveMov(){
   var cat=Q("mCat").value;
-  var est=parseFloat(Q("mEst").value)||0;
-  var real=parseFloat(Q("mReal").value)||0;
+  var est=parseInput(Q("mEst").value);
+  var real=parseInput(Q("mReal").value);
   if(!cat||(est===0&&real===0))return toast("Completá categoría y al menos un monto");
   var subEl=Q("mSub");
   var c=curM();
