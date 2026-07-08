@@ -32,7 +32,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .row{display:grid;gap:16px;margin-bottom:20px}
 .r4{grid-template-columns:repeat(4,1fr)}
 .r2{grid-template-columns:3fr 2fr}
-.r3{grid-template-columns:repeat(3,1fr)}
+.r3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .r2eq{grid-template-columns:repeat(3,1fr)}
 
 /* CARDS */
@@ -73,7 +73,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .risk-mid{background:rgba(255,209,102,.12);color:var(--gold);border:1px solid rgba(255,209,102,.25)}
 .risk-high{background:rgba(255,107,138,.12);color:var(--coral);border:1px solid rgba(255,107,138,.25)}
 .inv-amt{font-size:22px;font-weight:800;margin:10px 0 4px;letter-spacing:-.5px}
-.inv-ret{font-size:12px;font-weight:600}
+.REMOVED{font-size:12px;font-weight:600}
 
 /* GOALS */
 .goal-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r2);padding:16px}
@@ -366,7 +366,7 @@ function render(){
 
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>Inversiones<button style="margin-left:8px;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'inv\')">+</button></div>';
   if(S.inv.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin inversiones</div></div>';
-  else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r3" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div><div class="inv-ret" style="color:var(--teal)">+'+(inv.returnPct||0)+'% anual</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')">editar</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
+  else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r3" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+(inv.notes?' <span style="color:var(--t2);font-weight:400">| '+inv.notes+'</span>':'')+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')">editar</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
 
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas<button style="margin-left:8px;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'meta\')">+</button></div>';
   if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas</div></div>';
@@ -620,7 +620,7 @@ function renderInvModal(){
   INST.forEach(function(i){h+='<option value="'+i+'" '+(f.instrument===i?"selected":"")+'>'+i+'</option>'});
   h+='</select>';
   h+='<input id="iBrk" class="input" placeholder="Broker / Plataforma" value="'+(f.broker||"")+'">';
-  h+='<div class="form-row"><div><div class="form-label">Monto invertido</div><input id="iAmt" class="input" type="number" inputmode="numeric" placeholder="$ 0" value="'+(f.amount||"")+'"></div>';
+  h+='<div class="form-row"><div><div class="form-label">Monto invertido</div><input id="iAmt" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.amount||"")+'"></div>';
   h+='<div><div class="form-label">Nominales (opcional)</div><input id="iNom" class="input" type="number" inputmode="numeric" placeholder="Cantidad" value="'+(f.nominales||"")+'"></div></div>';
   h+='<div class="form-label">Nivel de riesgo</div>';
   h+='<div style="display:flex;gap:6px;margin-bottom:10px">';
@@ -664,7 +664,7 @@ function saveMov(){
   sv();closeModal();toast("Registrado \u2713");render();
 }
 function saveInv(){
-  var inst=Q("iInst").value,amt=parseFloat(Q("iAmt").value);
+  var inst=Q("iInst").value,amt=parseInput(Q("iAmt").value);
   if(!inst||!amt)return toast("Completá instrumento y monto");
   var e={instrument:inst,broker:Q("iBrk").value,amount:amt,nominales:parseFloat(Q("iNom")?Q("iNom").value:"")||0,date:Q("iDate").value,notes:Q("iNotes").value,risk:formData.risk||0,id:editId||Date.now().toString()};
   if(editId){S.inv=S.inv.map(function(i){return i.id===editId?e:i})}else{S.inv.push(e)}
