@@ -721,8 +721,23 @@ function addToGoal(id){
 
 // Load custom categories
 if(S.customCats.length>0){
+  // Build map of what names changed
+  var defaultNames=["Vivienda y servicios","Mercadería","Transporte","Ocio y salidas","Salud","Créditos","Educación","Estética","Servicios","Tecnología","Vestuario","Inversión","Impuestos","Emprendimiento","Ahorros"];
   EC.length=0;
   S.customCats.forEach(function(cc){EC.push({n:cc.n,sc:cc.sc.slice(),cl:cc.cl||"#5dadec"})});
+  
+  // Sync transactions: fix any category that doesn't exist in current EC
+  var ecNames=EC.map(function(e){return e.n});
+  var changed=false;
+  S.txns=S.txns.map(function(t){
+    if(ecNames.indexOf(t.category)===-1){
+      // Category doesn't exist - try to find match by checking if any EC name is contained in old name or vice versa
+      var match=EC.find(function(e){return t.category.indexOf(e.n)>-1||e.n.indexOf(t.category)>-1});
+      if(match){changed=true;return Object.assign({},t,{category:match.n})}
+    }
+    return t;
+  });
+  if(changed)sv();
 }
 // Migrate old data
 S.txns=S.txns.map(function(t){
