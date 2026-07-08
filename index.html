@@ -9,12 +9,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0a1628;--card:#1b2838;--card2:#213040;--border:#2a3f55;
+  --bg:#080e1a;--card:#111927;--card2:#172030;--border:#2a3f55;
   --text:#e2e8f0;--t2:#8899aa;--t3:#5a6f82;
-  --teal:#2dd4a8;--teal2:#25b890;--coral:#ff6b8a;--gold:#ffd166;--blue:#5dadec;--purple:#b68eff;--pink:#ff8fab;
+  --teal:#4a7dff;--teal2:#3a6ae6;--coral:#ff5c7a;--gold:#ffd166;--blue:#5dadec;--purple:#b68eff;--pink:#ff8fab;
   --r:16px;--r2:12px;
 }
-body{background:linear-gradient(160deg,#0a1628 0%,#0f1f33 50%,#0a1628 100%);min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(74,125,255,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(74,125,255,.04) 0%,transparent 50%);min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
 /* HEADER */
@@ -168,7 +168,7 @@ body{background:linear-gradient(160deg,#0a1628 0%,#0f1f33 50%,#0a1628 100%);min-
 .pay-counter-item{font-size:12px;color:var(--t2)}
 .pay-counter-item b{font-size:14px;display:block;margin-top:2px}
 .act-cell{white-space:nowrap;text-align:right}
-.var-pos{color:var(--teal)}.var-neg{color:var(--coral)}
+.var-pos{color:#4ade80}.var-neg{color:#ff5c7a}
 .kpi-est{font-size:11px;color:var(--t3);margin-top:6px}
 .kpi-est b{font-weight:700}
 .kpi-var{font-size:12px;font-weight:700;margin-top:3px}
@@ -223,7 +223,7 @@ body{background:linear-gradient(160deg,#0a1628 0%,#0f1f33 50%,#0a1628 100%);min-
 <div class="page" id="page"></div>
 
 <div class="fab-row">
-  <button class="fab" onclick="openModal('mov')">＋ Movimiento</button>
+  <button class="fab" style="background:var(--teal);color:#fff;border:none" onclick="openModal('mov')">＋ Movimiento</button>
 </div>
 
 <script>
@@ -330,8 +330,8 @@ function render(){
 
   h+='<div class="row r4">';
   h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',false,incEst,"var(--teal)",incEst-expEst);
-  h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true,expEst,"var(--coral)");
-  h+='<div class="card" style="border-top:3px solid var(--teal);background:linear-gradient(135deg,#1b2838,#162a38);box-shadow:0 0 20px rgba(45,212,168,.08)"><span class="kpi-icon ic-bal"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg></span><div class="kpi-label" style="color:var(--teal)">SALDO</div><div class="kpi-val" style="font-size:32px;color:'+(bal>=0?"var(--teal)":"var(--coral)")+'">'+fmt(bal)+'</div><div class="kpi-change '+(balChg>=0?"kpi-up":"kpi-down")+'">'+(balChg>=0?"↑":"↓")+Math.abs(balChg)+'% vs mes ant.</div></div>';
+  h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true,expEst,"var(--border)");
+  h+='<div class="card" style="border-top:3px solid var(--teal);background:linear-gradient(135deg,#111927,#131f35);box-shadow:0 0 30px rgba(74,125,255,.12)"><span class="kpi-icon ic-bal"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg></span><div class="kpi-label" style="color:var(--teal)">SALDO</div><div class="kpi-val" style="font-size:32px;color:'+(bal>=0?"var(--teal)":"var(--coral)")+'">'+fmt(bal)+'</div><div class="kpi-change '+(balChg>=0?"kpi-up":"kpi-down")+'">'+(balChg>=0?"↑":"↓")+Math.abs(balChg)+'% vs mes ant.</div></div>';
   if(carry!==0){
     h+='<div class="card" style="border-top:3px solid var(--purple)"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span><div class="kpi-label">Balance acumulado</div><div class="kpi-val" style="color:'+(totalBal>=0?"var(--teal)":"var(--coral)")+'">'+fmt(totalBal)+'</div><div class="kpi-est">Mes anterior: <b>'+fmt(carry)+'</b> \u00b7 Este mes: <b>'+fmt(bal)+'</b></div></div>';
   }
@@ -346,19 +346,19 @@ function render(){
   var incData=ggrp(t,"ingreso");
   h+='<div class="row r3">';
 
-  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Gastos por categoría</div>';
+  h+='<div><div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Gastos por categoría</div><div class="card">';
   if(catData.length===0) h+='<div class="empty-msg">Sin egresos</div>';
   else{var mx=catData[0].value;catData.filter(function(cd){return cd.value>0}).forEach(function(cd){var pct=exp>0?Math.round(cd.value/exp*100):0;var ec=EC.find(function(e){return e.n===cd.name});var cl=ec?ec.cl:"#5dadec";h+='<div class="cat-row"><div class="cat-dot" style="background:'+cl+'"></div><div class="cat-name">'+cd.name+'</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:'+Math.round(cd.value/mx*100)+'%;background:'+cl+'"></div></div><div class="cat-vals"><span class="cat-amt">'+fmt(cd.value)+'</span><span class="cat-pct">'+pct+'%</span></div></div>';})}
-  h+='</div>';
+  h+='</div></div>';
 
-  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div>';
+  h+='<div><div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div><div class="card">';
   if(incData.length===0) h+='<div class="empty-msg">Sin ingresos</div>';
   else{var mi=incData[0].value;incData.forEach(function(d){
       var srcEst=t.filter(function(x){return x.type==="ingreso"&&x.category===d.name}).reduce(function(s,x){return s+getAmounts(x).est},0);
       h+='<div class="inc-row"><div class="inc-name">'+d.name+(srcEst?'<div style="font-size:9px;color:var(--t3)">Est: '+fmt(srcEst)+'</div>':'')+'</div><div class="inc-bar-wrap"><div class="inc-bar" style="width:'+Math.round(d.value/mi*100)+'%"></div></div><div class="inc-val">'+fmt(d.value)+'</div></div>';})}
-  h+='</div>';
+  h+='</div></div>';
 
-  h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div><div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
+  h+='<div><div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div><div class="chart-box"><canvas id="chTrend"></canvas></div></div>';
   h+='</div>';
 
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>Inversiones <button style="margin-left:auto;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'inv\')">+</button></div>';
