@@ -391,7 +391,9 @@ function renderReg(c,t){
   // Payment planner - above tables
   var allEg=t.filter(function(x){return x.type==="egreso"});
   var allIng=t.filter(function(x){return x.type==="ingreso"});
-  var saldoActual=allIng.reduce(function(s,x){return s+getAmounts(x).real},0);
+  var totalIngReal=allIng.reduce(function(s,x){return s+getAmounts(x).real},0);
+  var totalEgReal=allEg.reduce(function(s,x){return s+getAmounts(x).real},0);
+  var saldoActual=totalIngReal-totalEgReal;
   var faltaIng=allIng.filter(function(x){return x.checked&&getAmounts(x).est>0&&getAmounts(x).real===0}).reduce(function(s,x){return s+getAmounts(x).est},0);
   var totalDisp=saldoActual+faltaIng;
   var selGastos=allEg.filter(function(x){return x.checked}).reduce(function(s,x){return s+getAmounts(x).est},0);
@@ -477,11 +479,15 @@ function renderReg(c,t){
   // Category manager
   h+='<div class="card cat-mgr" style="margin-top:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span>Gestionar categor\u00edas</div>';
   h+='<div class="card-sub">Agreg\u00e1 subcategor\u00edas o nuevas categor\u00edas de egreso</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
   EC.forEach(function(cat,ci){
-    h+='<div class="cat-item"><div class="cat-main" style="color:'+cat.cl+'">'+cat.n+'</div>';
-    h+='<div class="cat-subs">'+cat.sc.join(", ")+'</div>';
-    h+='<div><button class="btn-icon" onclick="promptAddSub('+ci+')">+ sub</button> <button class="btn-icon" onclick="editCat('+ci+')">editar</button> <button class="btn-icon" onclick="delCat('+ci+')">\u00d7</button></div></div>';
+    h+='<div class="cat-item" style="display:block;padding:8px"><div style="display:flex;align-items:center;gap:4px"><span class="cat-main" style="color:'+cat.cl+'">'+cat.n+'</span>';
+    h+='<button class="btn-icon" onclick="promptAddSub('+ci+')" style="font-size:10px">+</button>';
+    h+='<button class="btn-icon" onclick="editCat('+ci+')" style="font-size:10px">ed</button>';
+    h+='<button class="btn-icon" onclick="delCat('+ci+')" style="font-size:10px">\u00d7</button></div>';
+    h+='<div class="cat-subs" style="margin-top:3px;font-size:11px">'+cat.sc.join(", ")+'</div></div>';
   });
+  h+='</div>';
   h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button></div>';
   h+='</div>';
 
