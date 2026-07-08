@@ -157,6 +157,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .cat-add-row{display:flex;gap:6px;margin-top:8px}
 .cat-add-row .input{flex:1;padding:7px 10px;font-size:12px}
 .cat-add-btn{background:var(--card2);color:var(--teal);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+
+.chk-row{transition:background .2s}
+.chk-row.checked{background:rgba(45,212,168,.06)}
+.chk-row td:first-child{padding-left:6px}
+.chk{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;vertical-align:middle}
+.pay-counter{position:sticky;bottom:0;background:var(--card);border-top:2px solid var(--border);padding:12px 16px;border-radius:0 0 var(--r) var(--r);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.pay-counter-item{font-size:12px;color:var(--t2)}
+.pay-counter-item b{font-size:14px;display:block;margin-top:2px}
 .act-cell{white-space:nowrap;text-align:right}
 .var-pos{color:var(--teal)}.var-neg{color:var(--coral)}
 .kpi-est{font-size:11px;color:var(--t3);margin-top:6px}
@@ -317,7 +325,7 @@ function render(){
   h+='<div class="row r4">';
   h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',false,incEst,"var(--teal)");
   h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true,expEst,"var(--coral)");
-  h+=kpiCard("Balance neto",bal,balChg,"ic-bal",'<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>',false,0,"var(--blue)");
+  h+=kpiCard("Saldo",bal,balChg,"ic-bal",'<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>',false,0,"var(--blue)");
   if(carry!==0){
     h+='<div class="card" style="border-top:3px solid var(--purple)"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span><div class="kpi-label">Balance acumulado</div><div class="kpi-val" style="color:'+(totalBal>=0?"var(--teal)":"var(--coral)")+'">'+fmt(totalBal)+'</div><div class="kpi-est">Mes anterior: <b>'+fmt(carry)+'</b> \u00b7 Este mes: <b>'+fmt(bal)+'</b></div></div>';
   }
@@ -410,15 +418,16 @@ function renderReg(c,t){
 
   // EGRESOS
   h+='<div class="card reg-col"><h3 style="color:var(--coral)">EGRESOS</h3>';
-  h+='<table class="reg-table"><thead><tr><th>Categoría</th><th>Detalle</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
+  h+='<table class="reg-table"><thead><tr><th style="width:30px"></th><th>Categoría</th><th>Detalle</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
   h+='<tbody class="reg-body">';
-  if(egTxns.length===0) h+='<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px">Sin egresos</td></tr>';
+  if(egTxns.length===0) h+='<tr><td colspan="7" style="text-align:center;color:var(--t3);padding:20px">Sin egresos</td></tr>';
   else{egPage.forEach(function(tx){
     var am=getAmounts(tx);
     var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
     var vc=hasV?(v>0?"var-neg":"var-pos"):"";
     var detail=tx.subcategory||tx.description||"";
-    h+='<tr><td>'+tx.category+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
+    var isChk=tx.checked?"checked":"";
+    h+='<tr class="chk-row'+(tx.checked?" checked":"")+'"><td><input type="checkbox" class="chk" '+isChk+' onchange="toggleCheck(\''+tx.id+'\',this.checked)"></td><td>'+tx.category+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
     h+='<td style="color:var(--t3)">'+detail+'</td>';
     h+='<td style="text-align:right;color:var(--t3)">'+(am.est?fmt(am.est):"—")+'</td>';
     h+='<td style="text-align:right;font-weight:700">'+(am.real?fmt(am.real):"—")+'</td>';
@@ -427,7 +436,7 @@ function renderReg(c,t){
   });}
   h+='</tbody>';
   var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>0?"var-neg":"var-pos";
-  h+='<tfoot><tr class="reg-total"><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
+  h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
   h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td><td></td></tr></tfoot>';
   h+='</table>';
   if(egPages>1){h+='<div class="reg-pag">';
@@ -436,6 +445,19 @@ function renderReg(c,t){
     if(S.regPageE<egPages-1) h+='<button onclick="S.regPageE++;render();">Sig \u2192</button>';
     h+='</div>';}
   h+='</div>';
+
+  // Payment counter
+  var selSum=egTxns.filter(function(x){return x.checked}).reduce(function(s,x){return s+getAmounts(x).real},0);
+  var saldo=totIngReal;
+  var resta=saldo-selSum;
+  if(egTxns.length>0){
+    h+='<div class="pay-counter">';
+    h+='<div class="pay-counter-item">Seleccionados<b style="color:var(--coral)">'+fmt(selSum)+'</b></div>';
+    h+='<div class="pay-counter-item">Saldo disponible<b style="color:var(--teal)">'+fmt(saldo)+'</b></div>';
+    h+='<div class="pay-counter-item">Resta<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
+    if(selSum>0) h+='<button style="background:none;border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit" onclick="clearChecks()">Limpiar</button>';
+    h+='</div>';
+  }
 
   h+='</div>';
 
@@ -647,6 +669,18 @@ function addNewCat(){
   EC.push({n:name,sc:subs.length?subs:["General"],cl:colors[EC.length%colors.length]});
   S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice()}});
   sv();toast("Categor\u00eda creada");render();
+}
+function toggleCheck(id,val){
+  S.txns=S.txns.map(function(t){return t.id===id?Object.assign({},t,{checked:val}):t});
+  sv();render();
+}
+function clearChecks(){
+  var c=curM();
+  S.txns=S.txns.map(function(t){
+    if(t.month===c.m&&t.year===c.y&&t.type==="egreso")return Object.assign({},t,{checked:false});
+    return t;
+  });
+  sv();render();
 }
 function editInv(id){openModal("inv",id)}
 function delMov(id){if(!confirm("¿Eliminar movimiento?"))return;S.txns=S.txns.filter(function(t){return t.id!==id});sv();toast("Eliminado");render()}
