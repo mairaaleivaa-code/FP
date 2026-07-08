@@ -289,8 +289,14 @@ function getAmounts(tx){
 }
 function gsum(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){var a=getAmounts(x);return s+a.real},0)}
 function gsumEst(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){var a=getAmounts(x);return s+a.est},0)}
+function fixCatName(name){
+  var ecNames=EC.map(function(e){return e.n});
+  if(ecNames.indexOf(name)>-1)return name;
+  var match=EC.find(function(e){return name.indexOf(e.n)>-1||e.n.indexOf(name)>-1});
+  return match?match.n:name;
+}
 function ggrp(arr,tp){
-  var m={};arr.filter(function(x){return x.type===tp}).forEach(function(x){var a=getAmounts(x);m[x.category]=(m[x.category]||0)+a.real});
+  var m={};arr.filter(function(x){return x.type===tp}).forEach(function(x){var a=getAmounts(x);var cat=fixCatName(x.category);m[cat]=(m[cat]||0)+a.real});
   return Object.entries(m).map(function(e){return{name:e[0],value:e[1]}}).sort(function(a,b){return b.value-a.value});
 }
 
@@ -491,7 +497,7 @@ function renderReg(c,t){
     h+='<div class="cat-subs" style="margin-top:3px;font-size:11px;line-height:1.4">'+cat.sc.join(", ")+'</div></div></div>';
   });
   h+='</div>';
-  h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button></div>';
+  h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button><button class="cat-add-btn" onclick="syncCats()" style="background:var(--teal);color:#0d1b2a">Sincronizar</button></div>';
   h+='</div>';
 
   Q("page").innerHTML=h;
@@ -686,6 +692,18 @@ function delCat(catIdx){
   EC.splice(catIdx,1);
   S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice(),cl:c.cl}});
   sv();toast("Eliminada");render();
+}
+function syncCats(){
+  var ecNames=EC.map(function(e){return e.n});
+  var count=0;
+  S.txns=S.txns.map(function(t){
+    if(ecNames.indexOf(t.category)===-1){
+      var fixed=fixCatName(t.category);
+      if(fixed!==t.category){count++;return Object.assign({},t,{category:fixed})}
+    }
+    return t;
+  });
+  sv();toast(count>0?count+" movimientos actualizados":"Todo sincronizado");render();
 }
 function addNewCat(){
   var name=Q("newCatName").value.trim();
