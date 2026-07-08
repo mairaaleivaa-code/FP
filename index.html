@@ -480,13 +480,15 @@ function renderReg(c,t){
   // Category manager
   h+='<div class="card cat-mgr" style="margin-top:20px"><div class="card-title"><span class="sec-icon" style="background:rgba(93,173,236,.08);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span>Gestionar categor\u00edas</div>';
   h+='<div class="card-sub">Agreg\u00e1 subcategor\u00edas o nuevas categor\u00edas de egreso</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
   EC.forEach(function(cat,ci){
-    h+='<div class="cat-item" style="display:block;padding:8px"><div style="display:flex;align-items:center;gap:4px"><span class="cat-main" style="color:'+cat.cl+'">'+cat.n+'</span>';
+    h+='<div class="cat-item" style="display:flex;align-items:flex-start;gap:6px;padding:8px">';
+    h+='<div style="display:flex;gap:1px;flex-shrink:0;padding-top:1px">';
     h+='<button class="btn-icon" onclick="promptAddSub('+ci+')" style="font-size:10px">+</button>';
     h+='<button class="btn-icon" onclick="editCat('+ci+')" style="font-size:10px">ed</button>';
     h+='<button class="btn-icon" onclick="delCat('+ci+')" style="font-size:10px">\u00d7</button></div>';
-    h+='<div class="cat-subs" style="margin-top:3px;font-size:11px">'+cat.sc.join(", ")+'</div></div>';
+    h+='<div><div class="cat-main" style="color:'+cat.cl+';font-size:13px">'+cat.n+'</div>';
+    h+='<div class="cat-subs" style="margin-top:3px;font-size:11px;line-height:1.4">'+cat.sc.join(", ")+'</div></div></div>';
   });
   h+='</div>';
   h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button></div>';
@@ -666,12 +668,16 @@ function promptAddSub(catIdx){
 }
 function editCat(catIdx){
   var cat=EC[catIdx];
+  var oldName=cat.n;
   var newName=prompt("Nombre de la categor\u00eda:",cat.n);
   if(!newName)return;
   var newSubs=prompt("Subcategor\u00edas (separar con coma):",cat.sc.join(", "));
   if(newSubs===null)return;
   EC[catIdx].n=newName.trim();
   EC[catIdx].sc=newSubs.split(",").map(function(s){return s.trim()}).filter(function(s){return s});
+  if(oldName!==newName.trim()){
+    S.txns=S.txns.map(function(t){return t.category===oldName?Object.assign({},t,{category:newName.trim()}):t});
+  }
   S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice(),cl:c.cl}});
   sv();toast("Categor\u00eda editada");render();
 }
