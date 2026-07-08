@@ -255,8 +255,8 @@ function fmt(n){n=Number(n);if(isNaN(n))n=0;return"$ "+new Intl.NumberFormat("es
 function Q(id){return document.getElementById(id)}
 function sv(){localStorage.setItem("fp-txns",JSON.stringify(S.txns));localStorage.setItem("fp-inv",JSON.stringify(S.inv));localStorage.setItem("fp-goals",JSON.stringify(S.goals));localStorage.setItem("fp-cats",JSON.stringify(S.customCats))}
 function toast(m){var t=Q("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2200)}
-function kc(){Object.values(CH).forEach(function(c){try{c.destroy()}catch(e){}});CH={}}
-Chart.defaults.color="#5a6f82";Chart.defaults.font.family="Inter";
+function kc(){try{Object.values(CH).forEach(function(c){c.destroy()})}catch(e){}CH={}}
+try{Chart.defaults.color="#5a6f82";Chart.defaults.font.family="Inter"}catch(e){}
 
 function curM(){return{m:S.viewM,y:S.viewY}}
 function setMo(){S.viewM=+Q("selMo").value;S.viewY=+Q("selYr").value;render()}
@@ -465,6 +465,8 @@ function kpiCard(label,val,chg,iconCls,iconSvg,invertColor,est,accentColor){
 }
 
 function initCharts(c){
+  if(typeof Chart==="undefined")return;
+  try{
   var labels=[],dInc=[],dExp=[];
   for(var i=4;i>=0;i--){
     var m=c.m-i,y=c.y;while(m<0){m+=12;y--}
@@ -485,6 +487,7 @@ function initCharts(c){
       tooltip:{backgroundColor:"#1b2838",titleFont:{family:"Inter",weight:"700"},bodyFont:{family:"Inter"},padding:14,cornerRadius:10,borderColor:"#2a3f55",borderWidth:1,callbacks:{label:function(c){return c.dataset.label+": "+fmt(c.raw)}}}
     }}});
   }
+  }catch(e){console.log("Charts unavailable")}
 }
 
 // ===== MODALS =====
