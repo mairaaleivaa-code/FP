@@ -386,6 +386,20 @@ function renderReg(c,t){
   var egPages=Math.ceil(egTxns.length/PER)||1;
 
   var h='<div class="sec" style="margin-bottom:16px"><span class="sec-icon" style="background:rgba(255,209,102,.08);color:var(--gold)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Registro '+MO[c.m]+' '+c.y+'</div>';
+  // Payment planner - above tables
+  var allEg=t.filter(function(x){return x.type==="egreso"});
+  var selSum=allEg.filter(function(x){return x.checked}).reduce(function(s,x){return s+getAmounts(x).est},0);
+  var saldo=t.filter(function(x){return x.type==="ingreso"}).reduce(function(s,x){return s+getAmounts(x).real},0);
+  var resta=saldo-selSum;
+  if(allEg.length>0){
+    h+='<div class="card" style="margin-bottom:16px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-top:3px solid var(--teal)">';
+    h+='<div class="pay-counter-item">Gastos seleccionados<b style="color:var(--coral)">'+fmt(selSum)+'</b></div>';
+    h+='<div class="pay-counter-item">Saldo disponible<b style="color:var(--teal)">'+fmt(saldo)+'</b></div>';
+    h+='<div class="pay-counter-item">Resta<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
+    if(selSum>0) h+='<button style="background:none;border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit" onclick="clearChecks()">Limpiar</button>';
+    h+='</div>';
+  }
+
   h+='<div class="reg-grid">';
 
   // INGRESOS
@@ -445,19 +459,6 @@ function renderReg(c,t){
     if(S.regPageE<egPages-1) h+='<button onclick="S.regPageE++;render();">Sig \u2192</button>';
     h+='</div>';}
   h+='</div>';
-
-  // Payment counter
-  var selSum=egTxns.filter(function(x){return x.checked}).reduce(function(s,x){return s+getAmounts(x).real},0);
-  var saldo=totIngReal;
-  var resta=saldo-selSum;
-  if(egTxns.length>0){
-    h+='<div class="pay-counter">';
-    h+='<div class="pay-counter-item">Seleccionados<b style="color:var(--coral)">'+fmt(selSum)+'</b></div>';
-    h+='<div class="pay-counter-item">Saldo disponible<b style="color:var(--teal)">'+fmt(saldo)+'</b></div>';
-    h+='<div class="pay-counter-item">Resta<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
-    if(selSum>0) h+='<button style="background:none;border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit" onclick="clearChecks()">Limpiar</button>';
-    h+='</div>';
-  }
 
   h+='</div>';
 
