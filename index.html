@@ -200,7 +200,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button class="active" id="btnDash" onclick="setPage('dash')">Dashboard</button>
       <button id="btnReg" onclick="setPage('reg')">Registro</button>
     </div>
-    <select id="selMo" class="sel" style="min-width:110px;background:var(--card2);color:var(--text);border:1px solid var(--teal);font-weight:700;border-radius:20px;padding:7px 16px;cursor:pointer" onchange="setMo()"></select>
+    <select id="selMo" class="sel" style="min-width:110px;background:#2a3f55;color:#e2e8f0;border:1px solid #3a5570;font-weight:700;border-radius:20px;padding:7px 16px;cursor:pointer;font-size:13px" onchange="setMo()"></select>
     <select id="selYr" class="sel" style="min-width:70px;background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-weight:600;cursor:pointer" onchange="setMo()">
       <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
     </select>
@@ -267,10 +267,18 @@ function initSelectors(){
 }
 
 function gmt(m,y){return S.txns.filter(function(t){return t.month===m&&t.year===y})}
-function gsum(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){return s+(x.realAmt||x.amount||0)},0)}
-function gsumEst(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){return s+(x.estimated||0)},0)}
+function getAmounts(tx){
+  var e=0,r=0;
+  if(tx.estimated!==undefined&&tx.estimated!==null&&tx.estimated!=="")e=Number(tx.estimated);
+  if(tx.realAmt!==undefined&&tx.realAmt!==null&&tx.realAmt!=="")r=Number(tx.realAmt);
+  if(r===0&&tx.amount!==undefined)r=Number(tx.amount)||0;
+  if(isNaN(e))e=0;if(isNaN(r))r=0;
+  return{est:e,real:r};
+}
+function gsum(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){var a=getAmounts(x);return s+a.real},0)}
+function gsumEst(arr,tp){return arr.filter(function(x){return x.type===tp}).reduce(function(s,x){var a=getAmounts(x);return s+a.est},0)}
 function ggrp(arr,tp){
-  var m={};arr.filter(function(x){return x.type===tp}).forEach(function(x){m[x.category]=(m[x.category]||0)+(x.realAmt||x.amount||0)});
+  var m={};arr.filter(function(x){return x.type===tp}).forEach(function(x){var a=getAmounts(x);m[x.category]=(m[x.category]||0)+a.real});
   return Object.entries(m).map(function(e){return{name:e[0],value:e[1]}}).sort(function(a,b){return b.value-a.value});
 }
 
@@ -282,7 +290,7 @@ function render(){
   var carry=0;
   S.txns.forEach(function(tx){
     if(tx.year<c.y||(tx.year===c.y&&tx.month<c.m)){
-      var amt=tx.realAmt||tx.amount||0;
+      var amt=getAmounts(tx).real;
       if(tx.type==="ingreso")carry+=amt;else carry-=amt;
     }
   });
@@ -328,7 +336,7 @@ function render(){
   h+='<div class="card"><div class="card-title"><span class="sec-icon" style="background:rgba(45,212,168,.08);color:var(--teal)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div>';
   if(incData.length===0) h+='<div class="empty-msg">Sin ingresos</div>';
   else{var mi=incData[0].value;incData.forEach(function(d){
-      var srcEst=t.filter(function(x){return x.type==="ingreso"&&x.category===d.name}).reduce(function(s,x){return s+(x.estimated||0)},0);
+      var srcEst=t.filter(function(x){return x.type==="ingreso"&&x.category===d.name}).reduce(function(s,x){return s+getAmounts(x).est},0);
       h+='<div class="inc-row"><div class="inc-name">'+d.name+(srcEst?'<div style="font-size:9px;color:var(--t3)">Est: '+fmt(srcEst)+'</div>':'')+'</div><div class="inc-bar-wrap"><div class="inc-bar" style="width:'+Math.round(d.value/mi*100)+'%"></div></div><div class="inc-val">'+fmt(d.value)+'</div></div>';})}
   h+='</div>';
 
@@ -355,10 +363,10 @@ function renderReg(c,t){
   var ingTxns=t.filter(function(x){return x.type==="ingreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
   var egTxns=t.filter(function(x){return x.type==="egreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
 
-  var totIngEst=ingTxns.reduce(function(s,x){return s+(x.estimated||0)},0);
-  var totIngReal=ingTxns.reduce(function(s,x){return s+(x.realAmt||x.amount||0)},0);
-  var totEgEst=egTxns.reduce(function(s,x){return s+(x.estimated||0)},0);
-  var totEgReal=egTxns.reduce(function(s,x){return s+(x.realAmt||x.amount||0)},0);
+  var totIngEst=ingTxns.reduce(function(s,x){return s+getAmounts(x).est},0);
+  var totIngReal=ingTxns.reduce(function(s,x){return s+getAmounts(x).real},0);
+  var totEgEst=egTxns.reduce(function(s,x){return s+getAmounts(x).est},0);
+  var totEgReal=egTxns.reduce(function(s,x){return s+getAmounts(x).real},0);
 
   var ingPage=ingTxns.slice(S.regPageI*PER,(S.regPageI+1)*PER);
   var egPage=egTxns.slice(S.regPageE*PER,(S.regPageE+1)*PER);
