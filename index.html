@@ -380,7 +380,9 @@ function renderReg(c,t){
   var totEgEst=egTxns.reduce(function(s,x){return s+getAmounts(x).est},0);
   var totEgReal=egTxns.reduce(function(s,x){return s+getAmounts(x).real},0);
 
+  ingTxns.sort(function(a,b){return(b.checked?1:0)-(a.checked?1:0)});
   var ingPage=ingTxns.slice(S.regPageI*PER,(S.regPageI+1)*PER);
+  egTxns.sort(function(a,b){return(b.checked?1:0)-(a.checked?1:0)});
   var egPage=egTxns.slice(S.regPageE*PER,(S.regPageE+1)*PER);
   var ingPages=Math.ceil(ingTxns.length/PER)||1;
   var egPages=Math.ceil(egTxns.length/PER)||1;
