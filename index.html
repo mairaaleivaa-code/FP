@@ -162,10 +162,14 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 
 .chk-row{transition:background .2s}
 
-.pri-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;opacity:.3;transition:all .15s}
-.pri-btn.on{opacity:1}
+.pri-btn{background:none;border:1px solid var(--border);cursor:pointer;font-size:13px;padding:3px 6px;border-radius:6px;color:var(--t3);transition:all .15s;margin-right:2px}
+.pri-btn.on{opacity:1;border-color:transparent}
+.pri-btn.star{color:var(--t3)}
+.pri-btn.star.on{color:var(--teal);background:rgba(74,125,255,.15);border-color:var(--teal)}
+.pri-btn.chk{color:var(--t3)}
+.pri-btn.chk.on{color:#4ade80;background:rgba(74,222,128,.12);border-color:#4ade80}
 .pri-row{background:rgba(74,125,255,.06)}
-.done-row{opacity:.5}
+.done-row{opacity:.45}
 .done-row td{text-decoration:line-through}
 .chk-row.checked{background:rgba(45,212,168,.06)}
 .chk-row td:first-child{padding-left:6px}
