@@ -408,7 +408,7 @@ function renderReg(c,t){
   var saldoActual=totalIngReal-totalEgReal;
   var faltaIng=allIng.filter(function(x){return x.checked}).reduce(function(s,x){var a=getAmounts(x);var pending=a.est-a.real;return s+(pending>0?pending:0)},0);
   var totalDisp=saldoActual+faltaIng;
-  var selGastos=allEg.filter(function(x){return x.checked}).reduce(function(s,x){return s+getAmounts(x).est},0);
+  var selGastos=allEg.filter(function(x){return x.checked}).reduce(function(s,x){var a=getAmounts(x);var pending=a.est-a.real;return s+(pending>0?pending:0)},0);
   var resta=totalDisp-selGastos;
   if(allEg.length>0||allIng.length>0){
     h+='<div class="card" style="margin-bottom:16px;padding:16px 20px;border-top:3px solid var(--teal)">';
@@ -574,7 +574,7 @@ function openModal(type,id){
     else formData={instrument:"",broker:"",amount:"",date:"",notes:"",risk:0,returnPct:""}
   }else if(type==="meta"){
     if(id){var g=S.goals.find(function(x){return x.id===id});if(g)formData=Object.assign({},g)}
-    else formData={name:"",target:"",saved:0,monthly:"",icon:"otro",plazo:"mediano",deadline:"",notes:""}
+    else formData={name:"",target:"",saved:0,monthly:"",icon:"otro",plazo:"mediano",currency:"ARS",deadline:""}
   }
   renderModal();
 }
@@ -626,6 +626,9 @@ function renderInvModal(){
   INST.forEach(function(i){h+='<option value="'+i+'" '+(f.instrument===i?"selected":"")+'>'+i+'</option>'});
   h+='</select>';
   h+='<input id="iBrk" class="input" placeholder="Broker / Plataforma" value="'+(f.broker||"")+'">';
+  h+='<div class="form-label">Moneda</div><div style="display:flex;gap:6px;margin-bottom:10px">';
+  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(74,125,255,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
+  h+='</div>';
   h+='<div class="form-row"><div><div class="form-label">Monto invertido</div><input id="iAmt" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.amount||"")+'"></div>';
   h+='<div><div class="form-label">Nominales (opcional)</div><input id="iNom" class="input" type="number" inputmode="numeric" placeholder="Cantidad" value="'+(f.nominales||"")+'"></div></div>';
   h+='<div class="form-label">Nivel de riesgo</div>';
@@ -655,6 +658,9 @@ function renderMetaModal(){
   });
   h+='</div>';
 
+  h+='<div class="form-label">Moneda</div><div style="display:flex;gap:6px;margin-bottom:10px">';
+  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(74,125,255,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
+  h+='</div>';
   h+='<div class="form-row"><div><div class="form-label">Monto objetivo</div><input id="gT" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.target||"")+'"></div>';
   h+='<div><div class="form-label">Ya ahorrado</div><input id="gS" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.saved||"0")+'"></div></div>';
   h+='<input id="gM" class="input" inputmode="numeric" placeholder="Aporte mensual estimado" oninput="this.value=fmtInput(this.value)" value="'+(f.monthly||"")+'">';
@@ -680,14 +686,14 @@ function saveMov(){
 function saveInv(){
   var inst=Q("iInst").value,amt=parseInput(Q("iAmt").value);
   if(!inst||!amt)return toast("Completá instrumento y monto");
-  var e={instrument:inst,broker:Q("iBrk").value,amount:amt,nominales:parseFloat(Q("iNom")?Q("iNom").value:"")||0,date:Q("iDate").value,notes:Q("iNotes").value,risk:formData.risk||0,id:editId||Date.now().toString()};
+  var e={instrument:inst,currency:formData.currency||"ARS",broker:Q("iBrk").value,amount:amt,nominales:parseFloat(Q("iNom")?Q("iNom").value:"")||0,date:Q("iDate").value,notes:Q("iNotes").value,risk:formData.risk||0,id:editId||Date.now().toString()};
   if(editId){S.inv=S.inv.map(function(i){return i.id===editId?e:i})}else{S.inv.push(e)}
   sv();closeModal();toast("Inversión registrada ✓");render();
 }
 function saveGoal(){
   var name=Q("gN").value,target=parseInput(Q("gT").value);
   if(!name||!target)return toast("Completá nombre y monto");
-  var e={name:name,target:target,saved:parseInput(Q("gS").value),monthly:parseInput(Q("gM").value),icon:formData.icon||"otro",plazo:formData.plazo||"mediano",where:Q("gW").value,deadline:Q("gDl").value,notes:Q("gNo").value,id:editId||Date.now().toString()};
+  var e={name:name,target:target,saved:parseInput(Q("gS").value),monthly:parseInput(Q("gM").value),icon:formData.icon||"otro",plazo:formData.plazo||"mediano",currency:formData.currency||"ARS",where:Q("gW").value,deadline:Q("gDl").value,id:editId||Date.now().toString()};
   if(editId){S.goals=S.goals.map(function(g){return g.id===editId?e:g})}else{S.goals.push(e)}
   sv();closeModal();toast("Meta guardada ✓");render();
 }
