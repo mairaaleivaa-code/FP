@@ -135,8 +135,8 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .btn-icon:hover{color:var(--text);background:rgba(255,255,255,.05)}
 
 
-.reg-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:start}
-.reg-col{display:flex;flex-direction:column}
+.reg-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:stretch}
+.reg-col{display:flex;flex-direction:column;height:100%}
 .reg-col h3{font-size:14px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .reg-table{width:100%;font-size:11px;border-collapse:collapse}
 .reg-table th{text-align:left;font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:6px 6px;border-bottom:1px solid var(--border)}
@@ -144,7 +144,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .reg-table tr:last-child td{border-bottom:none}
 .reg-total{font-weight:700;border-top:2px solid var(--border)!important}
 .reg-total td{border-bottom:none!important;padding-top:10px}
-.reg-body{min-height:320px}
+.reg-body{min-height:420px}
 .reg-pag{display:flex;justify-content:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
 .reg-pag button{background:var(--bg);border:1px solid var(--border);color:var(--t2);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
 .reg-pag button:hover{color:var(--text);border-color:var(--teal)}
@@ -170,7 +170,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .pri-btn.chk.on{color:#4ade80;background:rgba(74,222,128,.12);border-color:#4ade80}
 .pri-row{background:rgba(74,125,255,.08);border-left:3px solid var(--teal)}
 .done-row{opacity:.35}
-.done-row td{text-decoration:line-through}
+.done-row .mov-cat-name{text-decoration:line-through}
 .chk-row.checked{background:rgba(45,212,168,.06)}
 .chk-row td:first-child{padding-left:6px}
 .chk{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;vertical-align:middle;-webkit-appearance:none;appearance:none;border:2px solid var(--border);border-radius:4px;background:transparent;position:relative}
@@ -396,7 +396,7 @@ function render(){
 function renderReg(c,t){
   if(!S.regPageI)S.regPageI=0;
   if(!S.regPageE)S.regPageE=0;
-  var PER=15;
+  var PER=12;
 
   var ingTxns=t.filter(function(x){return x.type==="ingreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
   var egTxns=t.filter(function(x){return x.type==="egreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
@@ -430,8 +430,8 @@ function renderReg(c,t){
     h+='<div class="pay-counter-item">Saldo actual<b style="color:var(--teal)">'+fmt(saldoActual)+'</b></div>';
     h+='<div class="pay-counter-item">Falta ingresar<b style="color:var(--gold)">'+(faltaIng>0?"+":"")+fmt(faltaIng)+'</b></div>';
     h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Total disponible<b style="color:var(--text)">'+fmt(totalDisp)+'</b></div>';
-    h+='<div class="pay-counter-item">Prioridad<b style="color:var(--coral)">'+fmt(selGastos)+'</b></div>';
-    h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Resta<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
+    h+='<div class="pay-counter-item">Gasto priori<b style="color:var(--coral)">'+fmt(selGastos)+'</b></div>';
+    h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Diferencia<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
     if(selGastos>0||faltaIng>0) h+='<button style="background:none;border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit" onclick="clearChecks()">Limpiar</button>';
     h+='</div></div>';
   }
@@ -507,11 +507,11 @@ function renderReg(c,t){
   EC.forEach(function(cat,ci){
     h+='<div class="cat-item" style="display:flex;align-items:flex-start;gap:6px;padding:8px">';
     h+='<div style="display:flex;gap:1px;flex-shrink:0;padding-top:1px">';
-    h+='<button class="btn-icon" onclick="promptAddSub('+ci+')" style="font-size:10px">+</button>';
-    h+='<button class="btn-icon" onclick="editCat('+ci+')" style="font-size:10px">ed</button>';
+    h+='<button class="btn-icon" onclick="promptAddSub('+ci+')" style="font-size:13px;padding:4px 8px">+</button>';
+    h+='<button class="btn-icon" onclick="editCat('+ci+')" style="font-size:12px;padding:4px 8px">ed</button>';
     h+='<button class="btn-icon" onclick="delCat('+ci+')" style="font-size:10px">\u00d7</button></div>';
-    h+='<div><div class="cat-main" style="color:'+cat.cl+';font-size:13px">'+cat.n+'</div>';
-    h+='<div class="cat-subs" style="margin-top:3px;font-size:11px;line-height:1.4">'+cat.sc.join(", ")+'</div></div></div>';
+    h+='<div><div class="cat-main" style="color:'+cat.cl+';font-size:14px">'+cat.n+'</div>';
+    h+='<div class="cat-subs" style="margin-top:3px;font-size:12px;line-height:1.5">'+cat.sc.join(", ")+'</div></div></div>';
   });
   h+='</div>';
   h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button><button class="cat-add-btn" onclick="syncCats()" style="background:var(--teal);color:#0d1b2a">Sincronizar</button></div>';
