@@ -161,6 +161,12 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .cat-add-btn{background:var(--card2);color:var(--teal);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
 
 .chk-row{transition:background .2s}
+
+.pri-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;opacity:.3;transition:all .15s}
+.pri-btn.on{opacity:1}
+.pri-row{background:rgba(74,125,255,.06)}
+.done-row{opacity:.5}
+.done-row td{text-decoration:line-through}
 .chk-row.checked{background:rgba(45,212,168,.06)}
 .chk-row td:first-child{padding-left:6px}
 .chk{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;vertical-align:middle;-webkit-appearance:none;appearance:none;border:2px solid var(--border);border-radius:4px;background:transparent;position:relative}
@@ -396,9 +402,9 @@ function renderReg(c,t){
   var totEgEst=egTxns.reduce(function(s,x){return s+getAmounts(x).est},0);
   var totEgReal=egTxns.reduce(function(s,x){return s+getAmounts(x).real},0);
 
-  ingTxns.sort(function(a,b){return(b.checked?1:0)-(a.checked?1:0)});
+  ingTxns.sort(function(a,b){var oa=a.priority?0:a.completed?2:1;var ob=b.priority?0:b.completed?2:1;return oa-ob});
   var ingPage=ingTxns.slice(S.regPageI*PER,(S.regPageI+1)*PER);
-  egTxns.sort(function(a,b){return(b.checked?1:0)-(a.checked?1:0)});
+  egTxns.sort(function(a,b){var oa=a.priority?0:a.completed?2:1;var ob=b.priority?0:b.completed?2:1;return oa-ob});
   var egPage=egTxns.slice(S.regPageE*PER,(S.regPageE+1)*PER);
   var ingPages=Math.ceil(ingTxns.length/PER)||1;
   var egPages=Math.ceil(egTxns.length/PER)||1;
@@ -410,9 +416,9 @@ function renderReg(c,t){
   var totalIngReal=allIng.reduce(function(s,x){return s+getAmounts(x).real},0);
   var totalEgReal=allEg.reduce(function(s,x){return s+getAmounts(x).real},0);
   var saldoActual=totalIngReal-totalEgReal;
-  var faltaIng=allIng.filter(function(x){return x.checked}).reduce(function(s,x){var a=getAmounts(x);var pending=a.est-a.real;return s+(pending>0?pending:0)},0);
+  var faltaIng=allIng.filter(function(x){return x.priority}).reduce(function(s,x){var a=getAmounts(x);var pending=a.est-a.real;return s+(pending>0?pending:0)},0);
   var totalDisp=saldoActual+faltaIng;
-  var selGastos=allEg.filter(function(x){return x.checked}).reduce(function(s,x){var a=getAmounts(x);var pending=a.est-a.real;return s+(pending>0?pending:0)},0);
+  var selGastos=allEg.filter(function(x){return x.priority}).reduce(function(s,x){var a=getAmounts(x);var pending=a.est>0?(a.est-a.real):a.real;return s+(pending>0?pending:0)},0);
   var resta=totalDisp-selGastos;
   if(allEg.length>0||allIng.length>0){
     h+='<div class="card" style="margin-bottom:16px;padding:16px 20px;border-top:3px solid var(--teal)">';
@@ -420,7 +426,7 @@ function renderReg(c,t){
     h+='<div class="pay-counter-item">Saldo actual<b style="color:var(--teal)">'+fmt(saldoActual)+'</b></div>';
     h+='<div class="pay-counter-item">Falta ingresar<b style="color:var(--gold)">'+(faltaIng>0?"+":"")+fmt(faltaIng)+'</b></div>';
     h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Total disponible<b style="color:var(--text)">'+fmt(totalDisp)+'</b></div>';
-    h+='<div class="pay-counter-item">Gastos tildados<b style="color:var(--coral)">'+fmt(selGastos)+'</b></div>';
+    h+='<div class="pay-counter-item">Prioridad<b style="color:var(--coral)">'+fmt(selGastos)+'</b></div>';
     h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Resta<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
     if(selGastos>0||faltaIng>0) h+='<button style="background:none;border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit" onclick="clearChecks()">Limpiar</button>';
     h+='</div></div>';
@@ -438,9 +444,8 @@ function renderReg(c,t){
     var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
     var vc=hasV?(v>=0?"var-pos":"var-neg"):"";
     var label=tx.category+(tx.description?" - "+tx.description:"");
-    var iChk=tx.checked?"checked":"";
-    h+='<tr class="chk-row'+(tx.checked?" checked":"")+'">';
-    h+='<td><input type="checkbox" class="chk" '+iChk+' onchange="toggleCheck(\''+tx.id+'\',this.checked)"></td>';
+    h+='<tr class="'+(tx.priority?"pri-row":"")+(tx.completed?" done-row":"")+'">';
+    h+='<td style="white-space:nowrap"><button class="pri-btn '+(tx.priority?"on":"")+'" onclick="togglePri(\''+tx.id+'\')">\u2605</button><button class="pri-btn '+(tx.completed?"on":"")+'" onclick="toggleDone(\''+tx.id+'\')">\u2713</button></td>';
     h+='<td>'+label+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
     h+='<td style="text-align:right;color:var(--t3)">'+(am.est?fmt(am.est):"—")+'</td>';
     h+='<td style="text-align:right;font-weight:700">'+(am.real?fmt(am.real):"—")+'</td>';
@@ -470,8 +475,7 @@ function renderReg(c,t){
     var vc=hasV?(v>0?"var-neg":"var-pos"):"";
     var detail=tx.subcategory||"";
     if(tx.description) detail+=(detail?" · ":"")+tx.description;
-    var isChk=tx.checked?"checked":"";
-    h+='<tr class="chk-row'+(tx.checked?" checked":"")+'"><td><input type="checkbox" class="chk" '+isChk+' onchange="toggleCheck(\''+tx.id+'\',this.checked)"></td><td>'+tx.category+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
+    h+='<tr class="'+(tx.priority?"pri-row":"")+(tx.completed?" done-row":"")+'"><td style="white-space:nowrap"><button class="pri-btn '+(tx.priority?"on":"")+'" onclick="togglePri(\''+tx.id+'\')">\u2605</button><button class="pri-btn '+(tx.completed?"on":"")+'" onclick="toggleDone(\''+tx.id+'\')">\u2713</button></td><td>'+tx.category+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
     h+='<td style="color:var(--t3)">'+detail+'</td>';
     h+='<td style="text-align:right;color:var(--t3)">'+(am.est?fmt(am.est):"—")+'</td>';
     h+='<td style="text-align:right;font-weight:700">'+(am.real?fmt(am.real):"—")+'</td>';
@@ -752,6 +756,14 @@ function addNewCat(){
   S.customCats=EC.map(function(c){return{n:c.n,sc:c.sc.slice()}});
   sv();toast("Categor\u00eda creada");render();
 }
+function togglePri(id){
+  S.txns=S.txns.map(function(t){return t.id===id?Object.assign({},t,{priority:!t.priority}):t});
+  sv();render();
+}
+function toggleDone(id){
+  S.txns=S.txns.map(function(t){return t.id===id?Object.assign({},t,{completed:!t.completed,priority:false}):t});
+  sv();render();
+}
 function toggleCheck(id,val){
   S.txns=S.txns.map(function(t){return t.id===id?Object.assign({},t,{checked:val}):t});
   sv();render();
@@ -759,7 +771,7 @@ function toggleCheck(id,val){
 function clearChecks(){
   var c=curM();
   S.txns=S.txns.map(function(t){
-    if(t.month===c.m&&t.year===c.y)return Object.assign({},t,{checked:false});
+    if(t.month===c.m&&t.year===c.y)return Object.assign({},t,{checked:false,priority:false,completed:false});
     return t;
   });
   sv();render();
