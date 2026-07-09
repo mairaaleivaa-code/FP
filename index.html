@@ -32,8 +32,8 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .row{display:grid;gap:16px;margin-bottom:20px}
 .r4{grid-template-columns:repeat(4,1fr)}
 .r2{grid-template-columns:3fr 2fr}
-.r3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.r3>div{overflow:hidden}
+.r3{display:grid;grid-template-columns:33.33% 33.33% 33.33%;gap:16px}
+.r3>div{overflow:hidden;min-width:0}
 .r2eq{grid-template-columns:repeat(3,1fr)}
 
 /* CARDS */
