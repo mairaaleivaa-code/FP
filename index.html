@@ -32,12 +32,12 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .row{display:grid;gap:16px;margin-bottom:20px}
 .r4{grid-template-columns:repeat(4,1fr)}
 .r2{grid-template-columns:3fr 2fr}
-.r3{display:grid;grid-template-columns:33.33% 33.33% 33.33%;gap:16px}
-.r3>div{overflow:hidden;min-width:0}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.r3>div{overflow:hidden;min-width:0;max-width:100%}
 .r2eq{grid-template-columns:repeat(3,1fr)}
 
 /* CARDS */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;min-width:0}
 .card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .card-sub{font-size:12px;color:var(--t2);margin-bottom:16px}
 
@@ -371,7 +371,7 @@ function render(){
 
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas<button style="margin-left:8px;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'meta\')">+</button></div>';
   if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas</div></div>';
-  else{h+='<div class="row r2eq">';S.goals.slice().sort(function(a,b){var ord={corto:0,mediano:1,largo:2};return(ord[a.plazo]||1)-(ord[b.plazo]||1)}).forEach(function(g){var p=Math.min(100,Math.round(g.saved/g.target*100));var rm=Math.max(0,g.target-g.saved);var mo=g.monthly||0;var ml=mo>0?Math.ceil(rm/mo):0;var pc=p>=100?"var(--teal)":p>60?"var(--blue)":"var(--gold)";var plzLabel=g.plazo==="corto"?"Corto plazo":g.plazo==="largo"?"Largo plazo":"Mediano plazo";
+  else{h+='<div class="row r2eq">';S.goals.slice().sort(function(a,b){var o={corto:1,mediano:2,largo:3};return(o[a.plazo||"mediano"]||2)-(o[b.plazo||"mediano"]||2)}).forEach(function(g){var p=Math.min(100,Math.round(g.saved/g.target*100));var rm=Math.max(0,g.target-g.saved);var mo=g.monthly||0;var ml=mo>0?Math.ceil(rm/mo):0;var pc=p>=100?"var(--teal)":p>60?"var(--blue)":"var(--gold)";var plzLabel=g.plazo==="corto"?"Corto plazo":g.plazo==="largo"?"Largo plazo":"Mediano plazo";
       var plzClass=g.plazo==="corto"?"risk-low":g.plazo==="largo"?"risk-high":"risk-mid";
       h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="goal-name">'+g.name+'</div><span class="risk-badge '+plzClass+'">'+plzLabel+'</span></div>'+(g.where?'<div style="font-size:11px;color:var(--t3);margin-top:4px">Ubicada en: '+g.where+'</div>':'')+(g.deadline?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Meta: '+g.deadline+'</div>':'')+'<div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pc+';font-weight:700">'+p+'%</span></div><div class="prog-bg"><div class="prog-fill" style="width:'+p+'%;background:'+pc+'"></div></div><div class="goal-info">';if(mo>0){h+='Aporte: <b style="color:var(--text)">'+fmt(mo)+'/mes</b> · ';if(rm>0)h+='Falta '+fmt(rm)+' · <b style="color:var(--teal)">'+(ml>12?(Math.floor(ml/12)+' a\u00f1o'+(Math.floor(ml/12)>1?'s':'')+' y '+(ml%12)+' meses'):(ml+(ml===1?' mes':' meses')))+'</b>';else h+='<b style="color:var(--teal)">Meta alcanzada</b>';}else{h+='Falta: '+fmt(rm);}h+='</div><div style="display:flex;gap:6px;margin-top:10px"><input type="number" inputmode="numeric" class="input" style="flex:1;padding:5px 8px;font-size:11px" placeholder="Sumar..." id="ga_'+g.id+'"><button style="background:var(--card);color:var(--teal);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-weight:700;cursor:pointer;font-size:11px;font-family:inherit" onclick="addToGoal(\''+g.id+'\')">+</button></div><div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">editar</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
 
