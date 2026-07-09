@@ -373,7 +373,7 @@ function render(){
   if(S.goals.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin metas</div></div>';
   else{h+='<div class="row r2eq">';S.goals.slice().sort(function(a,b){var ord={corto:0,mediano:1,largo:2};return(ord[a.plazo]||1)-(ord[b.plazo]||1)}).forEach(function(g){var p=Math.min(100,Math.round(g.saved/g.target*100));var rm=Math.max(0,g.target-g.saved);var mo=g.monthly||0;var ml=mo>0?Math.ceil(rm/mo):0;var pc=p>=100?"var(--teal)":p>60?"var(--blue)":"var(--gold)";var plzLabel=g.plazo==="corto"?"Corto plazo":g.plazo==="largo"?"Largo plazo":"Mediano plazo";
       var plzClass=g.plazo==="corto"?"risk-low":g.plazo==="largo"?"risk-high":"risk-mid";
-      h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="goal-name">'+g.name+'</div><span class="risk-badge '+plzClass+'">'+plzLabel+'</span></div>'+(g.where?'<div style="font-size:11px;color:var(--t3);margin-top:4px">Ubicada en: '+g.where+'</div>':'')+(g.deadline?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Meta: '+g.deadline+'</div>':'')+'<div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pc+';font-weight:700">'+p+'%</span></div><div class="prog-bg"><div class="prog-fill" style="width:'+p+'%;background:'+pc+'"></div></div><div class="goal-info">';if(mo>0){h+='Aporte: <b style="color:var(--text)">'+fmt(mo)+'/mes</b> · ';if(rm>0)h+='Falta '+fmt(rm)+' · <b style="color:var(--teal)">'+(ml>12?(Math.floor(ml/12)+' a\u00f1o'+(Math.floor(ml/12)>1?'s':'')+' y '+(ml%12)+' meses'):(ml+(ml===1?' mes':' meses')))+'</b>';else h+='<b style="color:var(--teal)">Meta alcanzada</b>';}else{h+='Falta: '+fmt(rm);}h+='</div><div style="display:flex;gap:6px;margin-top:10px"><input type="number" inputmode="numeric" class="input" style="flex:1;padding:8px 10px;font-size:12px" placeholder="Sumar..." id="ga_'+g.id+'"><button style="background:var(--card);color:var(--teal);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer;font-size:12px;font-family:inherit" onclick="addToGoal(\''+g.id+'\')">+</button></div><div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">editar</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
+      h+='<div class="goal-card"><div style="display:flex;justify-content:space-between;align-items:center"><div class="goal-name">'+g.name+'</div><span class="risk-badge '+plzClass+'">'+plzLabel+'</span></div>'+(g.where?'<div style="font-size:11px;color:var(--t3);margin-top:4px">Ubicada en: '+g.where+'</div>':'')+(g.deadline?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Meta: '+g.deadline+'</div>':'')+'<div class="goal-nums"><span>'+fmt(g.saved)+' / '+fmt(g.target)+'</span><span style="color:'+pc+';font-weight:700">'+p+'%</span></div><div class="prog-bg"><div class="prog-fill" style="width:'+p+'%;background:'+pc+'"></div></div><div class="goal-info">';if(mo>0){h+='Aporte: <b style="color:var(--text)">'+fmt(mo)+'/mes</b> · ';if(rm>0)h+='Falta '+fmt(rm)+' · <b style="color:var(--teal)">'+(ml>12?(Math.floor(ml/12)+' a\u00f1o'+(Math.floor(ml/12)>1?'s':'')+' y '+(ml%12)+' meses'):(ml+(ml===1?' mes':' meses')))+'</b>';else h+='<b style="color:var(--teal)">Meta alcanzada</b>';}else{h+='Falta: '+fmt(rm);}h+='</div><div style="display:flex;gap:6px;margin-top:10px"><input type="number" inputmode="numeric" class="input" style="flex:1;padding:5px 8px;font-size:11px" placeholder="Sumar..." id="ga_'+g.id+'"><button style="background:var(--card);color:var(--teal);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-weight:700;cursor:pointer;font-size:11px;font-family:inherit" onclick="addToGoal(\''+g.id+'\')">+</button></div><div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editGoal(\''+g.id+'\')">editar</button><button class="btn-icon" onclick="delGoal(\''+g.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
 
   Q("page").innerHTML=h;
   initCharts(c);
@@ -568,7 +568,7 @@ function openModal(type,id){
   modalType=type;editId=id||null;formData={};
   if(type==="mov"){
     if(id){var t=S.txns.find(function(x){return x.id===id});if(t)formData=Object.assign({},t)}
-    else formData={type:"egreso",category:"",subcategory:"",description:"",estimated:"",realAmt:"",date:""}
+    else formData={type:"egreso",currency:"ARS",category:"",subcategory:"",description:"",estimated:"",realAmt:"",date:""}
   }else if(type==="inv"){
     if(id){var inv=S.inv.find(function(x){return x.id===id});if(inv)formData=Object.assign({},inv)}
     else formData={instrument:"",broker:"",amount:"",date:"",notes:"",risk:0,returnPct:""}
@@ -608,6 +608,9 @@ function renderMovModal(){
     h+='</datalist>';
   }
   h+='<input id="mDesc" class="input" placeholder="Descripción (opcional)" value="'+(f.description||"")+'">';
+  h+='<div class="form-label">Moneda</div><div style="display:flex;gap:6px;margin-bottom:10px">';
+  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(74,125,255,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
+  h+='</div>';
   h+='<div class="form-row"><div><div class="form-label">Estimado</div><input id="mEst" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.estimated?fmtInput(f.estimated):"")+'" oninput="this.value=fmtInput(this.value)"></div>';
   h+='<div><div class="form-label">Real</div><input id="mReal" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.realAmt?f.realAmt?fmtInput(f.realAmt):"":"")+'" oninput="this.value=fmtInput(this.value)"></div></div>';
   h+='<div style="position:relative"><div class="form-label">Fecha</div><input id="mDate" class="input" type="date" value="'+(f.date||"")+'" style="padding-right:40px"><div style="position:absolute;right:12px;bottom:11px;color:var(--t2);font-size:16px;pointer-events:none">&#128197;</div></div>';
@@ -670,7 +673,7 @@ function saveMov(){
   if(!cat||(est===0&&real===0))return toast("Completá categoría y al menos un monto");
   var subEl=Q("mSub");
   var c=curM();
-  var e={type:formData.type,category:cat,subcategory:subEl?subEl.value:"",description:Q("mDesc").value,estimated:est,realAmt:real,date:Q("mDate").value,month:c.m,year:c.y,id:editId||Date.now().toString()};
+  var e={type:formData.type,currency:formData.currency||"ARS",category:cat,subcategory:subEl?subEl.value:"",description:Q("mDesc").value,estimated:est,realAmt:real,date:Q("mDate").value,month:c.m,year:c.y,id:editId||Date.now().toString()};
   if(editId){S.txns=S.txns.map(function(t){return t.id===editId?e:t})}else{S.txns.push(e)}
   sv();closeModal();toast("Registrado \u2713");render();
 }
