@@ -472,11 +472,11 @@ function renderReg(c,t){
   });}
   // Fill phantom rows to complete 12
   var ingShown=Math.min(ingPage.length,12);
-  for(var ph=ingShown;ph<10;ph++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
+  for(var ph=ingShown;ph<11;ph++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
   var viItems=ingTxns.filter(function(x){var a=getAmounts(x);return a.est>0&&a.real>0});var viEst=viItems.reduce(function(s,x){return s+getAmounts(x).est},0);var viReal=viItems.reduce(function(s,x){return s+getAmounts(x).real},0);var vi=viItems.length>0?(viReal-viEst):0;var vic=vi>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
-  h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td><td></td></tr></tfoot>';
+  h+='<td style="text-align:right;color:var(--t3)">\u2014</td><td></td></tr></tfoot>';
   h+='</table></div>';
   h+='<div class="reg-pag">';
     if(S.regPageI>0) h+='<button onclick="S.regPageI--;render();">\u2190 Ant</button>';
@@ -509,7 +509,7 @@ function renderReg(c,t){
   h+='</tbody>';
   var veItems=egTxns.filter(function(x){var a=getAmounts(x);return a.est>0&&a.real>0});var veEst=veItems.reduce(function(s,x){return s+getAmounts(x).est},0);var veReal=veItems.reduce(function(s,x){return s+getAmounts(x).real},0);var ve=veItems.length>0?(veReal-veEst):0;var vec=ve>0?"var-neg":"var-pos";
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
-  h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td><td></td></tr></tfoot>';
+  h+='<td style="text-align:right;color:var(--t3)">\u2014</td><td></td></tr></tfoot>';
   h+='</table></div>';
   h+='<div class="reg-pag">';
     if(S.regPageE>0) h+='<button onclick="S.regPageE--;render();">\u2190 Ant</button>';
