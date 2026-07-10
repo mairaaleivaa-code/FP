@@ -464,7 +464,7 @@ function renderReg(c,t){
   var ingShown=Math.min(ingPage.length,12);
   for(var ph=ingShown;ph<10;ph++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
-  var vi=totIngEst>0?(totIngReal-totIngEst):0;var vic=vi>=0?"var-pos":"var-neg";
+  var viItems=ingTxns.filter(function(x){var a=getAmounts(x);return a.est>0&&a.real>0});var viEst=viItems.reduce(function(s,x){return s+getAmounts(x).est},0);var viReal=viItems.reduce(function(s,x){return s+getAmounts(x).real},0);var vi=viItems.length>0?(viReal-viEst):0;var vic=vi>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
   h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td><td></td></tr></tfoot>';
   h+='</table></div>';
@@ -497,7 +497,7 @@ function renderReg(c,t){
   var egShown=Math.min(egPage.length,12);
   for(var ph2=egShown;ph2<10;ph2++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
-  var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>0?"var-neg":"var-pos";
+  var veItems=egTxns.filter(function(x){var a=getAmounts(x);return a.est>0&&a.real>0});var veEst=veItems.reduce(function(s,x){return s+getAmounts(x).est},0);var veReal=veItems.reduce(function(s,x){return s+getAmounts(x).real},0);var ve=veItems.length>0?(veReal-veEst):0;var vec=ve>0?"var-neg":"var-pos";
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
   h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td><td></td></tr></tfoot>';
   h+='</table></div>';
