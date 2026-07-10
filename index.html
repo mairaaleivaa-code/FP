@@ -480,7 +480,10 @@ function renderReg(c,t){
   for(var ph=ingShown;ph<11;ph++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
   var viItems=ingTxns.filter(function(x){var a=getAmounts(x);return a.est>0&&a.real>0});var viEst=viItems.reduce(function(s,x){return s+getAmounts(x).est},0);var viReal=viItems.reduce(function(s,x){return s+getAmounts(x).real},0);var vi=viItems.length>0?(viReal-viEst):0;var vic=vi>=0?"var-pos":"var-neg";
-  h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
+  var ingByCur={};ingTxns.forEach(function(x){var cur=x.currency||'ARS';var a=getAmounts(x);if(!ingByCur[cur])ingByCur[cur]={est:0,real:0};ingByCur[cur].est+=a.est;ingByCur[cur].real+=a.real});
+  var totIngEstStr=Object.keys(ingByCur).map(function(cur){var sym=cur==='USD'?'US$ ':cur==='EUR'?'\u20ac ':'$ ';return sym+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(ingByCur[cur].est)}).join(' | ');
+  var totIngRealStr=Object.keys(ingByCur).map(function(cur){var sym=cur==='USD'?'US$ ':cur==='EUR'?'\u20ac ':'$ ';return sym+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(ingByCur[cur].real)}).join(' | ');
+  h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3);font-size:11px">'+totIngEstStr+'</td><td style="text-align:right;font-size:11px">'+totIngRealStr+'</td>';
   h+='<td style="text-align:right;color:var(--t3)">\u2014</td>';
   h+='<td style="text-align:right;white-space:nowrap"><button class="pag-btn" '+(S.regPageI>0?'onclick="S.regPageI--;render();"':'disabled style="opacity:.3"')+'>&lt;</button><span style="font-size:10px;color:var(--t3);margin:0 3px">'+(S.regPageI+1)+'/'+Math.max(ingPages,1)+'</span><button class="pag-btn" '+(S.regPageI<ingPages-1?'onclick="S.regPageI++;render();"':'disabled style="opacity:.3"')+'>&gt;</button></td></tr></tfoot>';
   h+='</table></div>';
@@ -509,7 +512,10 @@ function renderReg(c,t){
   for(var ph2=egShown;ph2<10;ph2++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
   var veItems=egTxns.filter(function(x){var a=getAmounts(x);return a.est>0&&a.real>0});var veEst=veItems.reduce(function(s,x){return s+getAmounts(x).est},0);var veReal=veItems.reduce(function(s,x){return s+getAmounts(x).real},0);var ve=veItems.length>0?(veReal-veEst):0;var vec=ve>0?"var-neg":"var-pos";
-  h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
+  var egByCur={};egTxns.forEach(function(x){var cur=x.currency||'ARS';var a=getAmounts(x);if(!egByCur[cur])egByCur[cur]={est:0,real:0};egByCur[cur].est+=a.est;egByCur[cur].real+=a.real});
+  var totEgEstStr=Object.keys(egByCur).map(function(cur){var sym=cur==='USD'?'US$ ':cur==='EUR'?'\u20ac ':'$ ';return sym+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(egByCur[cur].est)}).join(' | ');
+  var totEgRealStr=Object.keys(egByCur).map(function(cur){var sym=cur==='USD'?'US$ ':cur==='EUR'?'\u20ac ':'$ ';return sym+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(egByCur[cur].real)}).join(' | ');
+  h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3);font-size:11px">'+totEgEstStr+'</td><td style="text-align:right;font-size:11px">'+totEgRealStr+'</td>';
   h+='<td style="text-align:right;color:var(--t3)">\u2014</td>';
   h+='<td style="text-align:right;white-space:nowrap"><button class="pag-btn" '+(S.regPageE>0?'onclick="S.regPageE--;render();"':'disabled style="opacity:.3"')+'>&lt;</button><span style="font-size:10px;color:var(--t3);margin:0 3px">'+(S.regPageE+1)+'/'+Math.max(egPages,1)+'</span><button class="pag-btn" '+(S.regPageE<egPages-1?'onclick="S.regPageE++;render();"':'disabled style="opacity:.3"')+'>&gt;</button></td></tr></tfoot>';
   h+='</table></div>';
