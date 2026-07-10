@@ -450,7 +450,7 @@ function renderReg(c,t){
   else{ingPage.forEach(function(tx){
     var am=getAmounts(tx);
     var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
-    var vc=hasV?(v>0?"var-neg":"var-pos"):"";
+    var vc=hasV?(v>=0?"var-pos":"var-neg"):"";
     var label=tx.category+(tx.description?" - "+tx.description:"");
     h+='<tr class="'+(tx.priority?"pri-row":"")+(tx.completed?" done-row":"")+'">';
     h+='<td style="white-space:nowrap"><button class="pri-btn '+(tx.priority?"on":"")+'" onclick="togglePri(\''+tx.id+'\')">\u2605</button><button class="pri-btn '+(tx.completed?"on":"")+'" onclick="toggleDone(\''+tx.id+'\')">\u2713</button></td>';
