@@ -444,11 +444,11 @@ function renderReg(c,t){
   if(allEg.length>0||allIng.length>0){
     h+='<div class="card" style="margin-bottom:16px;padding:16px 20px;border-top:3px solid var(--teal)">';
     h+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">';
-    h+='<div class="pay-counter-item">Saldo actual<b style="color:var(--teal)">'+fmt(saldoActual)+'</b></div>';
-    h+='<div class="pay-counter-item">Falta ingresar<b style="color:var(--gold)">'+(faltaIng>0?"+":"")+fmt(faltaIng)+'</b></div>';
-    h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Total disponible<b style="color:var(--text)">'+fmt(totalDisp)+'</b></div>';
-    h+='<div class="pay-counter-item">Gasto priori<b style="color:var(--coral)">'+fmt(selGastos)+'</b></div>';
-    h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Diferencia<b style="color:'+(resta>=0?"var(--teal)":"var(--coral)")+'">'+fmt(resta)+'</b></div>';
+    h+='<div class="pay-counter-item">Saldo actual<b style="color:#fff">'+fmt(saldoActual)+'</b></div>';
+    h+='<div class="pay-counter-item">Falta ingresar<b style="color:#fff">'+(faltaIng>0?"+":"")+fmt(faltaIng)+'</b></div>';
+    h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Total disponible<b style="color:#fff">'+fmt(totalDisp)+'</b></div>';
+    h+='<div class="pay-counter-item">Gasto priori<b style="color:#fff">'+fmt(selGastos)+'</b></div>';
+    h+='<div class="pay-counter-item" style="border-left:1px solid var(--border);padding-left:12px">Diferencia<b style="color:'+(resta>=0?"#4ade80":"#ff5c7a")+'">'+fmt(resta)+'</b></div>';
     if(selGastos>0||faltaIng>0) h+='<button style="background:none;border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:inherit" onclick="clearChecks()">Limpiar</button>';
     h+='</div></div>';
   }
@@ -525,7 +525,7 @@ function renderReg(c,t){
     h+='<button class="btn-icon" onclick="promptAddSub('+ci+')" style="font-size:13px;padding:4px 8px">+</button>';
     h+='<button class="btn-icon" onclick="editCat('+ci+')" style="font-size:12px;padding:4px 8px">ed</button>';
     h+='<button class="btn-icon" onclick="delCat('+ci+')" style="font-size:10px">\u00d7</button></div>';
-    h+='<div><div class="cat-main" style="color:'+cat.cl+';font-size:14px">'+cat.n+'</div>';
+    h+='<div><div class="cat-main" style="color:'+'#e2e8f0;font-size:14px">'+cat.n+'</div>';
     h+='<div class="cat-subs" style="margin-top:3px;font-size:12px;line-height:1.5">'+cat.sc.join(", ")+'</div></div></div>';
   });
   h+='</div>';
