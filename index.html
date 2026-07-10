@@ -459,6 +459,9 @@ function renderReg(c,t){
     h+='<td style="text-align:right" class="'+vc+'">'+(hasV?(v>=0?"+":"")+fmt(v):"—")+'</td>';
     h+='<td class="act-cell"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button> <button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></td></tr>';
   });}
+  // Fill phantom rows to complete 12
+  var ingShown=Math.min(ingPage.length,12);
+  for(var ph=ingShown;ph<12;ph++){h+='<tr><td colspan="6" style="height:35px"></td></tr>';}
   h+='</tbody>';
   var vi=totIngEst>0?(totIngReal-totIngEst):0;var vic=vi>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
@@ -489,6 +492,9 @@ function renderReg(c,t){
     h+='<td style="text-align:right" class="'+vc+'">'+(hasV?(v>0?"+":"")+fmt(v):"—")+'</td>';
     h+='<td class="act-cell"><button class="btn-icon" onclick="openModal(\'mov\',\''+tx.id+'\')">editar</button> <button class="btn-icon" onclick="delMov(\''+tx.id+'\')">\u00d7</button></td></tr>';
   });}
+  // Fill phantom rows to complete 12
+  var egShown=Math.min(egPage.length,12);
+  for(var ph2=egShown;ph2<12;ph2++){h+='<tr><td colspan="7" style="height:35px"></td></tr>';}
   h+='</tbody>';
   var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>0?"var-neg":"var-pos";
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
