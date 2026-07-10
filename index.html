@@ -137,6 +137,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 
 .reg-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:stretch}
 .reg-col{display:flex;flex-direction:column}
+.reg-col.card{min-height:500px}
 .reg-col h3{font-size:14px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .reg-table{width:100%;font-size:11px;border-collapse:collapse}
 .reg-table th{text-align:left;font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:6px 6px;border-bottom:1px solid var(--border)}
@@ -275,7 +276,7 @@ var S={
   viewM:new Date().getMonth(),customCats:JSON.parse(localStorage.getItem("fp-cats")||"[]"),viewY:new Date().getFullYear(),pg:"dash",hidden:true
 };
 
-function setPage(p){S.pg=p;Q("btnDash").classList.toggle("active",p==="dash");Q("btnReg").classList.toggle("active",p==="reg");S.regPageI=0;S.regPageE=0;render()}
+function setPage(p){S.pg=p;localStorage.setItem("fp-page",p);Q("btnDash").classList.toggle("active",p==="dash");Q("btnReg").classList.toggle("active",p==="reg");S.regPageI=0;S.regPageE=0;render()}
 var CH={};
 var now=new Date();
 
@@ -461,7 +462,7 @@ function renderReg(c,t){
   });}
   // Fill phantom rows to complete 12
   var ingShown=Math.min(ingPage.length,12);
-  for(var ph=ingShown;ph<10;ph++){h+='<tr><td colspan="6" style="height:35px"></td></tr>';}
+  for(var ph=ingShown;ph<10;ph++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
   var vi=totIngEst>0?(totIngReal-totIngEst):0;var vic=vi>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
@@ -494,7 +495,7 @@ function renderReg(c,t){
   });}
   // Fill phantom rows to complete 12
   var egShown=Math.min(egPage.length,12);
-  for(var ph2=egShown;ph2<10;ph2++){h+='<tr><td colspan="7" style="height:35px"></td></tr>';}
+  for(var ph2=egShown;ph2<10;ph2++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
   var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>0?"var-neg":"var-pos";
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
@@ -831,6 +832,8 @@ S.inv=S.inv.map(function(i){return i.risk!==undefined?i:Object.assign({},i,{risk
 S.goals=S.goals.map(function(g){return g.monthly!==undefined?g:Object.assign({},g,{monthly:0})});
 sv();
 
+S.pg=localStorage.getItem("fp-page")||"dash";
+Q("btnDash").classList.toggle("active",S.pg==="dash");Q("btnReg").classList.toggle("active",S.pg==="reg");
 if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){initSelectors();render()})}else{initSelectors();render()}
 </script>
 </body>
