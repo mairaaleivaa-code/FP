@@ -450,7 +450,7 @@ function renderReg(c,t){
   else{ingPage.forEach(function(tx){
     var am=getAmounts(tx);
     var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
-    var vc=hasV?(v>=0?"var-pos":"var-neg"):"";
+    var vc=hasV?(v>0?"var-neg":"var-pos"):"";
     var label=tx.category+(tx.description?" - "+tx.description:"");
     h+='<tr class="'+(tx.priority?"pri-row":"")+(tx.completed?" done-row":"")+'">';
     h+='<td style="white-space:nowrap"><button class="pri-btn '+(tx.priority?"on":"")+'" onclick="togglePri(\''+tx.id+'\')">\u2605</button><button class="pri-btn '+(tx.completed?"on":"")+'" onclick="toggleDone(\''+tx.id+'\')">\u2713</button></td>';
@@ -483,7 +483,7 @@ function renderReg(c,t){
   else{egPage.forEach(function(tx){
     var am=getAmounts(tx);
     var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
-    var vc=hasV?(v>=0?"var-pos":"var-neg"):"";
+    var vc=hasV?(v>0?"var-neg":"var-pos"):"";
     var detail=tx.subcategory||"";
     if(tx.description) detail+=(detail?" · ":"")+tx.description;
     h+='<tr class="'+(tx.priority?"pri-row":"")+(tx.completed?" done-row":"")+'"><td style="white-space:nowrap"><button class="pri-btn '+(tx.priority?"on":"")+'" onclick="togglePri(\''+tx.id+'\')">\u2605</button><button class="pri-btn '+(tx.completed?"on":"")+'" onclick="toggleDone(\''+tx.id+'\')">\u2713</button></td><td>'+tx.category+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
@@ -497,7 +497,7 @@ function renderReg(c,t){
   var egShown=Math.min(egPage.length,12);
   for(var ph2=egShown;ph2<10;ph2++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
-  var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>=0?"var-pos":"var-neg";
+  var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>0?"var-neg":"var-pos";
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
   h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td><td></td></tr></tfoot>';
   h+='</table></div>';
