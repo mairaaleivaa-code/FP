@@ -211,11 +211,6 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 }
 @media(max-width:500px){.r4{grid-template-columns:1fr}}
 
-
-#dashRow3 .card{flex:1}
-#dashRow3>div{display:flex;flex-direction:column}
-#dashRow3>div{flex:1 1 0 !important;width:0 !important;min-width:0 !important;max-width:33.33% !important;overflow:hidden !important}
-#dashRow3 .card{overflow:hidden}
 </style>
 </head>
 <body>
@@ -366,21 +361,36 @@ function render(){
 
   var catData=ggrp(t,"egreso");
   var incData=ggrp(t,"ingreso");
+  // Count max rows to equalize heights
+  var catFiltered=catData.filter(function(cd){return cd.value>0});
+  var maxRows=Math.max(catFiltered.length,incData.length,4);
+
   h+='<div style="display:flex;gap:12px;margin-bottom:16px">';
 
-  h+='<div style="flex:1;min-width:0;width:33.3%"><div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Gastos por categoría</div><div class="card">';
-  if(catData.length===0) h+='<div class="empty-msg">Sin egresos</div>';
-  else{var mx=catData[0].value;catData.filter(function(cd){return cd.value>0}).forEach(function(cd){var pct=exp>0?Math.round(cd.value/exp*100):0;var ec=EC.find(function(e){return e.n===cd.name});var cl=ec?ec.cl:"#5dadec";h+='<div class="cat-row"><div class="cat-dot" style="background:'+cl+'"></div><div class="cat-name">'+cd.name+'</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:'+Math.round(cd.value/mx*100)+'%;background:'+cl+'"></div></div><div class="cat-vals"><span class="cat-amt">'+fmt(cd.value)+'</span><span class="cat-pct">'+pct+'%</span></div></div>';})}
+  // COL 1: Gastos por categoría
+  h+='<div style="flex:1 1 0;min-width:0;width:0;display:flex;flex-direction:column">';
+  h+='<div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Gastos por categoría</div>';
+  h+='<div class="card" style="flex:1">';
+  if(catFiltered.length===0) h+='<div class="empty-msg">Sin egresos</div>';
+  else{var mx=catFiltered[0].value;catFiltered.forEach(function(cd){var pct=exp>0?Math.round(cd.value/exp*100):0;var ec=EC.find(function(e){return e.n===cd.name});var cl=ec?ec.cl:"#5dadec";h+='<div class="cat-row"><div class="cat-dot" style="background:'+cl+'"></div><div class="cat-name">'+cd.name+'</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:'+Math.round(cd.value/mx*100)+'%;background:'+cl+'"></div></div><div class="cat-vals"><span class="cat-amt">'+fmt(cd.value)+'</span><span class="cat-pct">'+pct+'%</span></div></div>';})}
+  for(var gi=catFiltered.length;gi<maxRows;gi++){h+='<div style="height:36px"></div>';}
   h+='</div></div>';
 
-  h+='<div style="flex:1;min-width:0;width:33.3%"><div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div><div class="card">';
+  // COL 2: Ingresos por fuente
+  h+='<div style="flex:1 1 0;min-width:0;width:0;display:flex;flex-direction:column">';
+  h+='<div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Ingresos por fuente</div>';
+  h+='<div class="card" style="flex:1">';
   if(incData.length===0) h+='<div class="empty-msg">Sin ingresos</div>';
   else{var mi=incData[0].value;incData.forEach(function(d){
       var srcEst=t.filter(function(x){return x.type==="ingreso"&&x.category===d.name}).reduce(function(s,x){return s+getAmounts(x).est},0);
       h+='<div class="inc-row"><div class="inc-name">'+d.name+(srcEst?'<div style="font-size:9px;color:var(--t3)">Est: '+fmt(srcEst)+'</div>':'')+'</div><div class="inc-bar-wrap"><div class="inc-bar" style="width:'+Math.round(d.value/mi*100)+'%"></div></div><div class="inc-val">'+fmt(d.value)+'</div></div>';})}
+  for(var ii=incData.length;ii<maxRows;ii++){h+='<div style="height:36px"></div>';}
   h+='</div></div>';
 
-  h+='<div style="flex:1;min-width:0;width:33.3%"><div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div><div class="card"><div class="chart-box"><canvas id="chTrend"></canvas></div></div></div>';
+  // COL 3: Comparación
+  h+='<div style="flex:1 1 0;min-width:0;width:0;display:flex;flex-direction:column">';
+  h+='<div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Comparación</div>';
+  h+='<div class="card" style="flex:1"><div class="chart-box"><canvas id="chTrend"></canvas></div></div></div>';
   h+='</div>';
 
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>Inversiones<button style="margin-left:8px;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'inv\')">+</button></div>';
