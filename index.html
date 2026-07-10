@@ -137,7 +137,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 
 .reg-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:stretch}
 .reg-col{display:flex;flex-direction:column}
-.reg-col.card{min-height:500px}
+
 .reg-col h3{font-size:14px;font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .reg-table{width:100%;font-size:11px;border-collapse:collapse}
 .reg-table th{text-align:left;font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:6px 6px;border-bottom:1px solid var(--border)}
@@ -444,7 +444,7 @@ function renderReg(c,t){
 
   // INGRESOS
   h+='<div class="card reg-col"><h3 style="color:#4ade80">INGRESOS</h3>';
-  h+='<table class="reg-table"><thead><tr><th style="width:30px"></th><th>Categoría</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
+  h+='<div style="min-height:440px;display:flex;flex-direction:column"><table class="reg-table" style="flex:1"><thead><tr><th style="width:30px"></th><th>Categoría</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
   h+='<tbody class="reg-body">';
   if(ingTxns.length===0) h+='<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px">Sin ingresos</td></tr>';
   else{ingPage.forEach(function(tx){
@@ -467,7 +467,7 @@ function renderReg(c,t){
   var vi=totIngEst>0?(totIngReal-totIngEst):0;var vic=vi>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
   h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td><td></td></tr></tfoot>';
-  h+='</table>';
+  h+='</table></div>';
   h+='<div class="reg-pag">';
     if(S.regPageI>0) h+='<button onclick="S.regPageI--;render();">\u2190 Ant</button>';
     h+='<span>'+(S.regPageI+1)+'/'+ingPages+'</span>';
@@ -477,13 +477,13 @@ function renderReg(c,t){
 
   // EGRESOS
   h+='<div class="card reg-col"><h3 style="color:#ff5c7a">EGRESOS</h3>';
-  h+='<table class="reg-table"><thead><tr><th style="width:30px"></th><th>Categoría</th><th>Detalle</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
+  h+='<div style="min-height:440px;display:flex;flex-direction:column"><table class="reg-table" style="flex:1"><thead><tr><th style="width:30px"></th><th>Categoría</th><th>Detalle</th><th style="text-align:right">Estim.</th><th style="text-align:right">Real</th><th style="text-align:right">Var.</th><th></th></tr></thead>';
   h+='<tbody class="reg-body">';
   if(egTxns.length===0) h+='<tr><td colspan="7" style="text-align:center;color:var(--t3);padding:20px">Sin egresos</td></tr>';
   else{egPage.forEach(function(tx){
     var am=getAmounts(tx);
     var hasV=am.est>0&&am.real>0;var v=am.real-am.est;
-    var vc=hasV?(v>0?"var-neg":"var-pos"):"";
+    var vc=hasV?(v>=0?"var-pos":"var-neg"):"";
     var detail=tx.subcategory||"";
     if(tx.description) detail+=(detail?" · ":"")+tx.description;
     h+='<tr class="'+(tx.priority?"pri-row":"")+(tx.completed?" done-row":"")+'"><td style="white-space:nowrap"><button class="pri-btn '+(tx.priority?"on":"")+'" onclick="togglePri(\''+tx.id+'\')">\u2605</button><button class="pri-btn '+(tx.completed?"on":"")+'" onclick="toggleDone(\''+tx.id+'\')">\u2713</button></td><td>'+tx.category+(tx.date?'<div style="font-size:10px;color:var(--t3)">'+tx.date+'</div>':'')+'</td>';
@@ -497,10 +497,10 @@ function renderReg(c,t){
   var egShown=Math.min(egPage.length,12);
   for(var ph2=egShown;ph2<10;ph2++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
-  var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>0?"var-neg":"var-pos";
+  var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
   h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td><td></td></tr></tfoot>';
-  h+='</table>';
+  h+='</table></div>';
   h+='<div class="reg-pag">';
     if(S.regPageE>0) h+='<button onclick="S.regPageE--;render();">\u2190 Ant</button>';
     h+='<span>'+(S.regPageE+1)+'/'+egPages+'</span>';
