@@ -399,7 +399,7 @@ function render(){
 function renderReg(c,t){
   if(!S.regPageI)S.regPageI=0;
   if(!S.regPageE)S.regPageE=0;
-  var PER=12;
+  var PER=10;
 
   var ingTxns=t.filter(function(x){return x.type==="ingreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
   var egTxns=t.filter(function(x){return x.type==="egreso"}).sort(function(a,b){return(+b.id)-(+a.id)});
@@ -461,17 +461,17 @@ function renderReg(c,t){
   });}
   // Fill phantom rows to complete 12
   var ingShown=Math.min(ingPage.length,12);
-  for(var ph=ingShown;ph<12;ph++){h+='<tr><td colspan="6" style="height:35px"></td></tr>';}
+  for(var ph=ingShown;ph<10;ph++){h+='<tr><td colspan="6" style="height:35px"></td></tr>';}
   h+='</tbody>';
   var vi=totIngEst>0?(totIngReal-totIngEst):0;var vic=vi>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
   h+='<td style="text-align:right" class="'+vic+'">'+(vi>=0?"+":"")+fmt(vi)+'</td><td></td></tr></tfoot>';
   h+='</table>';
-  if(ingPages>1){h+='<div class="reg-pag">';
+  h+='<div class="reg-pag">';
     if(S.regPageI>0) h+='<button onclick="S.regPageI--;render();">\u2190 Ant</button>';
     h+='<span>'+(S.regPageI+1)+'/'+ingPages+'</span>';
     if(S.regPageI<ingPages-1) h+='<button onclick="S.regPageI++;render();">Sig \u2192</button>';
-    h+='</div>';}
+    h+='</div>';
   h+='</div>';
 
   // EGRESOS
@@ -494,17 +494,17 @@ function renderReg(c,t){
   });}
   // Fill phantom rows to complete 12
   var egShown=Math.min(egPage.length,12);
-  for(var ph2=egShown;ph2<12;ph2++){h+='<tr><td colspan="7" style="height:35px"></td></tr>';}
+  for(var ph2=egShown;ph2<10;ph2++){h+='<tr><td colspan="7" style="height:35px"></td></tr>';}
   h+='</tbody>';
   var ve=totEgEst>0?(totEgReal-totEgEst):0;var vec=ve>0?"var-neg":"var-pos";
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
   h+='<td style="text-align:right" class="'+vec+'">'+(ve>0?"+":"")+fmt(ve)+'</td><td></td></tr></tfoot>';
   h+='</table>';
-  if(egPages>1){h+='<div class="reg-pag">';
+  h+='<div class="reg-pag">';
     if(S.regPageE>0) h+='<button onclick="S.regPageE--;render();">\u2190 Ant</button>';
     h+='<span>'+(S.regPageE+1)+'/'+egPages+'</span>';
     if(S.regPageE<egPages-1) h+='<button onclick="S.regPageE++;render();">Sig \u2192</button>';
-    h+='</div>';}
+    h+='</div>';
   h+='</div>';
 
   h+='</div>';
