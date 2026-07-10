@@ -162,7 +162,7 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .cat-subs{flex:1;color:var(--t2)}
 .cat-add-row{display:flex;gap:6px;margin-top:8px}
 .cat-add-row .input{flex:1;padding:7px 10px;font-size:12px}
-.cat-add-btn{background:var(--card2);color:var(--teal);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.cat-add-btn{background:var(--card2);color:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
 
 .chk-row{transition:background .2s}
 
@@ -529,7 +529,7 @@ function renderReg(c,t){
     h+='<div class="cat-subs" style="margin-top:3px;font-size:12px;line-height:1.5">'+cat.sc.join(", ")+'</div></div></div>';
   });
   h+='</div>';
-  h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button><button class="cat-add-btn" onclick="syncCats()" style="background:var(--teal);color:#0d1b2a">Sincronizar</button></div>';
+  h+='<div class="cat-add-row"><input id="newCatName" class="input" placeholder="Nueva categor\u00eda..."><input id="newCatSub" class="input" placeholder="Subcategor\u00edas (separar con coma)"><button class="cat-add-btn" onclick="addNewCat()">Agregar</button><button class="cat-add-btn" onclick="syncCats()" style="background:var(--teal);color:#fff;font-weight:700">Sincronizar</button></div>';
   h+='</div>';
 
   Q("page").innerHTML=h;
