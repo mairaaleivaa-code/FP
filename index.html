@@ -11,10 +11,10 @@
 :root{
   --bg:#080e1a;--card:#111927;--card2:#172030;--border:#2a3f55;
   --text:#e2e8f0;--t2:#8899aa;--t3:#5a6f82;
-  --teal:#4a7dff;--teal2:#3a6ae6;--coral:#ff5c7a;--gold:#ffd166;--blue:#5dadec;--purple:#b68eff;--pink:#ff8fab;
+  --teal:#284bab;--teal2:#3a6ae6;--coral:#ff5c7a;--gold:#ffd166;--blue:#5dadec;--purple:#b68eff;--pink:#ff8fab;
   --r:16px;--r2:12px;
 }
-body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(74,125,255,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(74,125,255,.04) 0%,transparent 50%);min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(40,75,171,.08) 0%,transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(40,75,171,.04) 0%,transparent 50%);min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
 /* HEADER */
@@ -169,10 +169,10 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .pri-btn{background:none;border:1px solid var(--border);cursor:pointer;font-size:13px;padding:3px 6px;border-radius:6px;color:var(--t3);transition:all .15s;margin-right:2px}
 .pri-btn.on{opacity:1;border-color:transparent}
 .pri-btn.star{color:var(--t3)}
-.pri-btn.star.on{color:var(--teal);background:rgba(74,125,255,.15);border-color:var(--teal)}
+.pri-btn.star.on{color:var(--teal);background:rgba(40,75,171,.15);border-color:var(--teal)}
 .pri-btn.chk{color:var(--t3)}
 .pri-btn.chk.on{color:#4ade80;background:rgba(74,222,128,.12);border-color:#4ade80}
-.pri-row{background:rgba(74,125,255,.08);border-left:3px solid var(--teal)}
+.pri-row{background:rgba(40,75,171,.08);border-left:3px solid var(--teal)}
 .done-row{opacity:.35}
 .done-row .mov-cat-name{text-decoration:line-through}
 .chk-row.checked{background:rgba(45,212,168,.06)}
@@ -349,7 +349,7 @@ function render(){
   h+='<div class="row r4">';
   h+=kpiCard("Ingresos",inc,incChg,"ic-up",'<svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',false,incEst,"#4ade80","novar");
   h+=kpiCard("Egresos",exp,expChg*-1,"ic-down",'<svg viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',true,expEst,"#ff5c7a","novar");
-  h+='<div class="card" style="border-top:3px solid var(--teal);background:linear-gradient(135deg,#111927,#131f35);box-shadow:0 0 30px rgba(74,125,255,.12)"><span class="kpi-icon" style="background:rgba(74,125,255,.12);color:var(--teal)"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg></span><div class="kpi-label" style="color:var(--text)">SALDO</div><div class="kpi-val" style="font-size:32px;color:var(--text)">'+fmt(bal)+'</div><div class="kpi-change" style="color:var(--text)">'+(balChg>=0?"↑":"↓")+Math.abs(balChg)+'% vs mes ant.</div></div>';
+  h+='<div class="card" style="border-top:3px solid var(--teal);background:linear-gradient(135deg,#111927,#131f35);box-shadow:0 0 30px rgba(40,75,171,.12)"><span class="kpi-icon" style="background:rgba(40,75,171,.12);color:var(--teal)"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg></span><div class="kpi-label" style="color:var(--text)">SALDO</div><div class="kpi-val" style="font-size:32px;color:var(--text)">'+fmt(bal)+'</div><div class="kpi-change" style="color:var(--text)">'+(balChg>=0?"↑":"↓")+Math.abs(balChg)+'% vs mes ant.</div></div>';
   if(carry!==0){
     h+='<div class="card" style="border-top:3px solid var(--purple)"><span class="kpi-icon ic-save"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span><div class="kpi-label">Balance acumulado</div><div class="kpi-val" style="color:'+(totalBal>=0?"var(--teal)":"var(--coral)")+'">'+fmt(totalBal)+'</div><div class="kpi-est">Mes anterior: <b>'+fmt(carry)+'</b> \u00b7 Este mes: <b>'+fmt(bal)+'</b></div></div>';
   }
@@ -475,17 +475,13 @@ function renderReg(c,t){
   });}
   // Fill phantom rows to complete 12
   var ingShown=Math.min(ingPage.length,12);
-  for(var ph=ingShown;ph<10;ph++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
+  for(var ph=ingShown;ph<11;ph++){h+='<tr style="height:35px"><td></td><td></td><td></td><td></td><td></td><td></td></tr>';}
   h+='</tbody>';
   var viItems=ingTxns.filter(function(x){var a=getAmounts(x);return a.est>0&&a.real>0});var viEst=viItems.reduce(function(s,x){return s+getAmounts(x).est},0);var viReal=viItems.reduce(function(s,x){return s+getAmounts(x).real},0);var vi=viItems.length>0?(viReal-viEst):0;var vic=vi>=0?"var-pos":"var-neg";
   h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totIngEst)+'</td><td style="text-align:right">'+fmt(totIngReal)+'</td>';
-  h+='<td style="text-align:right;color:var(--t3)">\u2014</td><td></td></tr></tfoot>';
+  h+='<td style="text-align:right;color:var(--t3)">\u2014</td>';
+  h+='<td style="text-align:right;white-space:nowrap"><button class="pag-btn" '+(S.regPageI>0?'onclick="S.regPageI--;render();"':'disabled style="opacity:.3"')+'>&lt;</button><span style="font-size:10px;color:var(--t3);margin:0 3px">'+(S.regPageI+1)+'/'+Math.max(ingPages,1)+'</span><button class="pag-btn" '+(S.regPageI<ingPages-1?'onclick="S.regPageI++;render();"':'disabled style="opacity:.3"')+'>&gt;</button></td></tr></tfoot>';
   h+='</table></div>';
-  h+='<div class="reg-pag">';
-    h+='<button '+(S.regPageI>0?'onclick="S.regPageI--;render();"':'disabled style="opacity:.3;cursor:default"')+'>'+'\u2190 Ant</button>';
-    h+='<span>'+(S.regPageI+1)+'/'+Math.max(ingPages,1)+'</span>';
-    h+='<button '+(S.regPageI<ingPages-1?'onclick="S.regPageI++;render();"':'disabled style="opacity:.3;cursor:default"')+'>Sig \u2192</button>';
-    h+='</div>';
   h+='</div>';
 
   // EGRESOS
@@ -512,13 +508,9 @@ function renderReg(c,t){
   h+='</tbody>';
   var veItems=egTxns.filter(function(x){var a=getAmounts(x);return a.est>0&&a.real>0});var veEst=veItems.reduce(function(s,x){return s+getAmounts(x).est},0);var veReal=veItems.reduce(function(s,x){return s+getAmounts(x).real},0);var ve=veItems.length>0?(veReal-veEst):0;var vec=ve>0?"var-neg":"var-pos";
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3)">'+fmt(totEgEst)+'</td><td style="text-align:right">'+fmt(totEgReal)+'</td>';
-  h+='<td style="text-align:right;color:var(--t3)">\u2014</td><td></td></tr></tfoot>';
+  h+='<td style="text-align:right;color:var(--t3)">\u2014</td>';
+  h+='<td style="text-align:right;white-space:nowrap"><button class="pag-btn" '+(S.regPageE>0?'onclick="S.regPageE--;render();"':'disabled style="opacity:.3"')+'>&lt;</button><span style="font-size:10px;color:var(--t3);margin:0 3px">'+(S.regPageE+1)+'/'+Math.max(egPages,1)+'</span><button class="pag-btn" '+(S.regPageE<egPages-1?'onclick="S.regPageE++;render();"':'disabled style="opacity:.3"')+'>&gt;</button></td></tr></tfoot>';
   h+='</table></div>';
-  h+='<div class="reg-pag">';
-    h+='<button '+(S.regPageE>0?'onclick="S.regPageE--;render();"':'disabled style="opacity:.3;cursor:default"')+'>'+'\u2190 Ant</button>';
-    h+='<span>'+(S.regPageE+1)+'/'+Math.max(egPages,1)+'</span>';
-    h+='<button '+(S.regPageE<egPages-1?'onclick="S.regPageE++;render();"':'disabled style="opacity:.3;cursor:default"')+'>Sig \u2192</button>';
-    h+='</div>';
   h+='</div>';
 
   h+='</div>';
@@ -644,7 +636,7 @@ function renderMovModal(){
   }
   h+='<input id="mDesc" class="input" placeholder="Descripción (opcional)" value="'+(f.description||"")+'">';
   h+='<div class="form-label">Moneda</div><div style="display:flex;gap:6px;margin-bottom:10px">';
-  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(74,125,255,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
+  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(40,75,171,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
   h+='</div>';
   h+='<div class="form-row"><div><div class="form-label">Estimado</div><input id="mEst" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.estimated?fmtInput(f.estimated):"")+'" oninput="this.value=fmtInput(this.value)"></div>';
   h+='<div><div class="form-label">Real</div><input id="mReal" class="input" inputmode="numeric" placeholder="$ 0" value="'+(f.realAmt?f.realAmt?fmtInput(f.realAmt):"":"")+'" oninput="this.value=fmtInput(this.value)"></div></div>';
@@ -662,7 +654,7 @@ function renderInvModal(){
   h+='</select>';
   h+='<input id="iBrk" class="input" placeholder="Broker / Plataforma" value="'+(f.broker||"")+'">';
   h+='<div class="form-label">Moneda</div><div style="display:flex;gap:6px;margin-bottom:10px">';
-  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(74,125,255,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
+  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(40,75,171,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
   h+='</div>';
   h+='<div class="form-row"><div><div class="form-label">Monto invertido</div><input id="iAmt" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.amount||"")+'"></div>';
   h+='<div><div class="form-label">Nominales (opcional)</div><input id="iNom" class="input" type="number" inputmode="numeric" placeholder="Cantidad" value="'+(f.nominales||"")+'"></div></div>';
@@ -670,7 +662,7 @@ function renderInvModal(){
   h+='<div style="display:flex;gap:6px;margin-bottom:10px">';
   RISKS.forEach(function(r,i){
     var isActive=(f.risk||0)===i;
-    h+='<button type="button" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid '+(isActive?"var(--teal)":"var(--border)")+';font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isActive?"rgba(74,125,255,.1)":"transparent")+';color:'+(isActive?"var(--teal)":"var(--t2)")+'" onclick="formData.risk='+i+';renderModal()">'+r.n+'</button>';
+    h+='<button type="button" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid '+(isActive?"var(--teal)":"var(--border)")+';font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isActive?"rgba(40,75,171,.1)":"transparent")+';color:'+(isActive?"var(--teal)":"var(--t2)")+'" onclick="formData.risk='+i+';renderModal()">'+r.n+'</button>';
   });
   h+='</div>';
   h+='<div style="position:relative"><div class="form-label">Fecha</div><input id="iDate" class="input" type="date" value="'+(f.date||"")+'" style="padding-right:40px"><div style="position:absolute;right:12px;bottom:11px;color:var(--t2);font-size:16px;pointer-events:none">&#128197;</div></div>';
@@ -689,12 +681,12 @@ function renderMetaModal(){
   var plazos=[{k:"corto",l:"Corto plazo"},{k:"mediano",l:"Mediano plazo"},{k:"largo",l:"Largo plazo"}];
   plazos.forEach(function(pl){
     var isA=(f.plazo||"mediano")===pl.k;
-    h+='<button type="button" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(74,125,255,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.plazo=\''+pl.k+'\';renderModal()">'+pl.l+'</button>';
+    h+='<button type="button" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(40,75,171,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.plazo=\''+pl.k+'\';renderModal()">'+pl.l+'</button>';
   });
   h+='</div>';
 
   h+='<div class="form-label">Moneda</div><div style="display:flex;gap:6px;margin-bottom:10px">';
-  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(74,125,255,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
+  ["ARS","USD","EUR"].forEach(function(cur){var isA=(f.currency||"ARS")===cur;h+='<button type="button" style="padding:5px 12px;border-radius:8px;border:1.5px solid '+(isA?"var(--teal)":"var(--border)")+';font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;background:'+(isA?"rgba(40,75,171,.1)":"transparent")+';color:'+(isA?"var(--teal)":"var(--t2)")+'" onclick="formData.currency=\''+cur+'\';renderModal()">'+cur+'</button>'});
   h+='</div>';
   h+='<div class="form-row"><div><div class="form-label">Monto objetivo</div><input id="gT" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.target||"")+'"></div>';
   h+='<div><div class="form-label">Ya ahorrado</div><input id="gS" class="input" inputmode="numeric" placeholder="$ 0" oninput="this.value=fmtInput(this.value)" value="'+(f.saved||"0")+'"></div></div>';
