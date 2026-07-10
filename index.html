@@ -71,9 +71,9 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 /* INVESTMENTS */
 .inv-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--r2);padding:16px}
 .risk-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.3px}
-.risk-low{background:rgba(45,212,168,.12);color:var(--teal);border:1px solid rgba(45,212,168,.25)}
-.risk-mid{background:rgba(255,209,102,.12);color:var(--gold);border:1px solid rgba(255,209,102,.25)}
-.risk-high{background:rgba(255,107,138,.12);color:var(--coral);border:1px solid rgba(255,107,138,.25)}
+.risk-low{background:#284bab;color:#fff;border:none}
+.risk-mid{background:#284bab;color:#fff;border:none}
+.risk-high{background:#284bab;color:#fff;border:none}
 .inv-amt{font-size:22px;font-weight:800;margin:10px 0 4px;letter-spacing:-.5px}
 .REMOVED{font-size:12px;font-weight:600}
 
@@ -375,7 +375,7 @@ function render(){
   h+='<div class="sec"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Gastos por categoría</div>';
   h+='<div class="card" style="flex:1">';
   if(catFiltered.length===0) h+='<div class="empty-msg">Sin egresos</div>';
-  else{var mx=catFiltered[0].value;catFiltered.forEach(function(cd){var pct=exp>0?Math.round(cd.value/exp*100):0;var ec=EC.find(function(e){return e.n===cd.name});var cl=ec?ec.cl:"#5dadec";h+='<div class="cat-row"><div class="cat-dot" style="background:'+cl+'"></div><div class="cat-name">'+cd.name+'</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:'+Math.round(cd.value/mx*100)+'%;background:'+cl+'"></div></div><div class="cat-vals"><span class="cat-amt">'+fmt(cd.value)+'</span><span class="cat-pct">'+pct+'%</span></div></div>';})}
+  else{var mx=catFiltered[0].value;catFiltered.forEach(function(cd){var pct=exp>0?Math.round(cd.value/exp*100):0;var ec=EC.find(function(e){return e.n===cd.name});var cl="#284bab";h+='<div class="cat-row"><div class="cat-dot" style="background:'+cl+'"></div><div class="cat-name">'+cd.name+'</div><div class="cat-bar-wrap"><div class="cat-bar" style="width:'+Math.round(cd.value/mx*100)+'%;background:'+cl+'"></div></div><div class="cat-vals"><span class="cat-amt">'+fmt(cd.value)+'</span><span class="cat-pct">'+pct+'%</span></div></div>';})}
   for(var gi=catFiltered.length;gi<maxRows;gi++){h+='<div style="height:36px"></div>';}
   h+='</div></div>';
 
