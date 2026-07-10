@@ -480,9 +480,9 @@ function renderReg(c,t){
   h+='<td style="text-align:right;color:var(--t3)">\u2014</td><td></td></tr></tfoot>';
   h+='</table></div>';
   h+='<div class="reg-pag">';
-    if(S.regPageI>0) h+='<button onclick="S.regPageI--;render();">\u2190 Ant</button>';
-    h+='<span>'+(S.regPageI+1)+'/'+ingPages+'</span>';
-    if(S.regPageI<ingPages-1) h+='<button onclick="S.regPageI++;render();">Sig \u2192</button>';
+    h+='<button '+(S.regPageI>0?'onclick="S.regPageI--;render();"':'disabled style="opacity:.3;cursor:default"')+'>'+'\u2190 Ant</button>';
+    h+='<span>'+(S.regPageI+1)+'/'+Math.max(ingPages,1)+'</span>';
+    h+='<button '+(S.regPageI<ingPages-1?'onclick="S.regPageI++;render();"':'disabled style="opacity:.3;cursor:default"')+'>Sig \u2192</button>';
     h+='</div>';
   h+='</div>';
 
@@ -513,9 +513,9 @@ function renderReg(c,t){
   h+='<td style="text-align:right;color:var(--t3)">\u2014</td><td></td></tr></tfoot>';
   h+='</table></div>';
   h+='<div class="reg-pag">';
-    if(S.regPageE>0) h+='<button onclick="S.regPageE--;render();">\u2190 Ant</button>';
-    h+='<span>'+(S.regPageE+1)+'/'+egPages+'</span>';
-    if(S.regPageE<egPages-1) h+='<button onclick="S.regPageE++;render();">Sig \u2192</button>';
+    h+='<button '+(S.regPageE>0?'onclick="S.regPageE--;render();"':'disabled style="opacity:.3;cursor:default"')+'>'+'\u2190 Ant</button>';
+    h+='<span>'+(S.regPageE+1)+'/'+Math.max(egPages,1)+'</span>';
+    h+='<button '+(S.regPageE<egPages-1?'onclick="S.regPageE++;render();"':'disabled style="opacity:.3;cursor:default"')+'>Sig \u2192</button>';
     h+='</div>';
   h+='</div>';
 
