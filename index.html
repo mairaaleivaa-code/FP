@@ -121,9 +121,9 @@ body{background:#080e1a;background-image:radial-gradient(ellipse at 50% 0%,rgba(
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn{border:none;border-radius:var(--r2);padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;transition:opacity .15s}
 .btn:hover{opacity:.9}
-.btn-teal{background:var(--teal);color:#0d1b2a}
-.btn-blue{background:var(--blue);color:#fff}
-.btn-purple{background:var(--purple);color:#fff}
+.btn-teal{background:#284bab;color:#fff}
+.btn-blue{background:#284bab;color:#fff}
+.btn-purple{background:#284bab;color:#fff}
 .toggle-row{display:flex;gap:8px;margin-bottom:12px}
 .toggle-btn{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--t2);transition:all .2s}
 .tg-g{background:rgba(45,212,168,.1);color:var(--teal);border-color:rgba(45,212,168,.3)}
@@ -400,7 +400,7 @@ function render(){
   h+='<div style="margin-top:40px"></div>';
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>Inversiones<button style="margin-left:8px;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'inv\')">+</button></div>';
   if(S.inv.length===0) h+='<div class="card" style="margin-bottom:20px"><div class="empty-msg">Sin inversiones</div></div>';
-  else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r3" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+(inv.notes?' <span style="color:var(--t2);font-weight:400">| '+inv.notes+'</span>':'')+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+(inv.date?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Desde: '+inv.date+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')" title="Editar">✎</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
+  else{var ti=S.inv.reduce(function(s,i){return s+i.amount},0);h+='<div class="card-sub" style="margin-bottom:12px">Total: <b style="color:var(--text)">'+fmt(ti)+'</b></div><div class="row r2eq" style="margin-bottom:20px">';S.inv.forEach(function(inv){var ri=inv.risk||0;var rk=RISKS[ri]||RISKS[0];h+='<div class="inv-card"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:700">'+inv.instrument+(inv.notes?' <span style="color:var(--t2);font-weight:400">| '+inv.notes+'</span>':'')+'</div><span class="risk-badge '+rk.c+'">'+rk.n+'</span></div><div class="inv-amt">'+fmt(inv.amount)+'</div>'+(inv.broker?'<div style="font-size:11px;color:var(--t3);margin-top:4px">'+inv.broker+'</div>':'')+(inv.date?'<div style="font-size:11px;color:var(--t3);margin-top:2px">Desde: '+inv.date+'</div>':'')+'<div style="display:flex;gap:2px;margin-top:6px;justify-content:flex-end"><button class="btn-icon" onclick="editInv(\''+inv.id+'\')" title="Editar">✎</button><button class="btn-icon" onclick="delInv(\''+inv.id+'\')">\u00d7</button></div></div>';});h+='</div>';}
 
   h+='<div style="margin-top:40px"></div>';
   h+='<div class="sec" style="justify-content:flex-start"><span class="sec-icon" style="background:rgba(255,255,255,.05);color:var(--t2)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Metas<button style="margin-left:8px;background:var(--card2);border:1px solid var(--border);color:var(--t2);border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="openModal(\'meta\')">+</button></div>';
@@ -485,7 +485,7 @@ function renderReg(c,t){
   var totIngEstStr=Object.keys(ingByCur).map(function(cur){var sym=cur==='USD'?'US$ ':cur==='EUR'?'\u20ac ':'$ ';return sym+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(ingByCur[cur].est)}).join(' | ');
   var totIngRealStr=Object.keys(ingByCur).map(function(cur){var sym=cur==='USD'?'US$ ':cur==='EUR'?'\u20ac ':'$ ';return sym+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(ingByCur[cur].real)}).join(' | ');
   h+='<tfoot><tr class="reg-total"><td></td><td>Total</td><td style="text-align:right;color:var(--t3);font-size:11px">'+totIngEstStr+'</td><td style="text-align:right;font-size:11px">'+totIngRealStr+'</td>';
-  h+='<td style="text-align:right;color:var(--t3)">\u2014</td>';
+  h+='<td style="text-align:right"></td>';
   h+='<td style="text-align:right;white-space:nowrap"><button class="pag-btn" '+(S.regPageI>0?'onclick="S.regPageI--;render();"':'disabled style="opacity:.3"')+'>&lt;</button><span style="font-size:10px;color:var(--t3);margin:0 3px">'+(S.regPageI+1)+'/'+Math.max(ingPages,1)+'</span><button class="pag-btn" '+(S.regPageI<ingPages-1?'onclick="S.regPageI++;render();"':'disabled style="opacity:.3"')+'>&gt;</button></td></tr></tfoot>';
   h+='</table></div>';
   h+='</div>';
@@ -517,7 +517,7 @@ function renderReg(c,t){
   var totEgEstStr=Object.keys(egByCur).map(function(cur){var sym=cur==='USD'?'US$ ':cur==='EUR'?'\u20ac ':'$ ';return sym+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(egByCur[cur].est)}).join(' | ');
   var totEgRealStr=Object.keys(egByCur).map(function(cur){var sym=cur==='USD'?'US$ ':cur==='EUR'?'\u20ac ':'$ ';return sym+new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(egByCur[cur].real)}).join(' | ');
   h+='<tfoot><tr class="reg-total"><td></td><td colspan="2">Total</td><td style="text-align:right;color:var(--t3);font-size:11px">'+totEgEstStr+'</td><td style="text-align:right;font-size:11px">'+totEgRealStr+'</td>';
-  h+='<td style="text-align:right;color:var(--t3)">\u2014</td>';
+  h+='<td style="text-align:right"></td>';
   h+='<td style="text-align:right;white-space:nowrap"><button class="pag-btn" '+(S.regPageE>0?'onclick="S.regPageE--;render();"':'disabled style="opacity:.3"')+'>&lt;</button><span style="font-size:10px;color:var(--t3);margin:0 3px">'+(S.regPageE+1)+'/'+Math.max(egPages,1)+'</span><button class="pag-btn" '+(S.regPageE<egPages-1?'onclick="S.regPageE++;render();"':'disabled style="opacity:.3"')+'>&gt;</button></td></tr></tfoot>';
   h+='</table></div>';
   h+='</div>';
@@ -616,7 +616,31 @@ function openModal(type,id){
 }
 function closeModal(){Q("modalRoot").innerHTML="";modalType=null;editId=null}
 
+function saveFormState(){
+  var els=["mCat","mSub","mDesc","mEst","mReal","mDate","iBrk","iInst","iNotes","iAmt","iNom","iDate","gN","gT","gS","gM","gW","gDl"];
+  els.forEach(function(id){var el=document.getElementById(id);if(el){
+    if(id==="mCat")formData.category=el.value;
+    else if(id==="mSub")formData.subcategory=el.value;
+    else if(id==="mDesc")formData.description=el.value;
+    else if(id==="mEst")formData.estimated=parseInput(el.value);
+    else if(id==="mReal")formData.realAmt=parseInput(el.value);
+    else if(id==="mDate")formData.date=el.value;
+    else if(id==="iBrk")formData.broker=el.value;
+    else if(id==="iInst")formData.instrument=el.value;
+    else if(id==="iNotes")formData.notes=el.value;
+    else if(id==="iAmt")formData.amount=parseInput(el.value);
+    else if(id==="iNom")formData.nominales=parseFloat(el.value)||0;
+    else if(id==="iDate")formData.date=el.value;
+    else if(id==="gN")formData.name=el.value;
+    else if(id==="gT")formData.target=parseInput(el.value);
+    else if(id==="gS")formData.saved=parseInput(el.value);
+    else if(id==="gM")formData.monthly=parseInput(el.value);
+    else if(id==="gW")formData.where=el.value;
+    else if(id==="gDl")formData.deadline=el.value;
+  }});
+}
 function renderModal(){
+  saveFormState();
   var h='<div class="modal-bg" onclick="closeModal()"><div class="modal" onclick="event.stopPropagation()">';
   if(modalType==="mov") h+=renderMovModal();
   else if(modalType==="inv") h+=renderInvModal();
